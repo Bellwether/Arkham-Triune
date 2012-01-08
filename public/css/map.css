@@ -1,0 +1,37 @@
+#hud fieldset.ui-controlgroup {
+margin:0;
+}
+#hud .ui-radio.ui-disabled {
+opacity:1;
+}
+
+#map {
+text-align:center;
+}
+#map #grid {
+background-color:#020202;
+-moz-box-shadow: 1px 1px 15px #020202,  -1px -1px 15px #020202;
+-webkit-box-shadow: 1px 1px 15px #020202,  -1px -1px 15px #020202;
+box-shadow: 1px 1px 15px #020202,  -1px -1px 15px #020202;
+-ms-filter: "progid:DXImageTransform.Microsoft.Shadow(Strength=15, Direction=135, Color='#020202')";
+filter: progid:DXImageTransform.Microsoft.Shadow(Strength=15, Direction=135, Color='#020202');
+margin:5px auto 10px auto;
+}
+#map #grid td {
+height:96px;
+position:relative;
+width:96px;
+}
+#map #grid td .slot {
+cursor:pointer;
+height:100%;
+position:absolute;	
+width:100%;
+}
+
+
+
+
+.Cultist {
+color:red;	
+}

@@ -1,0 +1,31 @@
+<form id='map' action='<%- '/maps/' + locals.map._id %>' method='put'>
+  <label for='index' class='ui-hidden-accessible'></label>
+  <input type='hidden' name='index' value='' />
+
+  <% if (locals.map) { %>
+    <table id='grid'>
+    <% for (var y = 0; y < locals.map.size; y++) { %>
+      <tr>
+        <% for (var x = 0; x < locals.map.size; x++) { %>
+          <% var tile = locals.map.tileAt((y * locals.map.size) + x) %>
+          <td>
+            <div class='tile <%- tile ? tile.name.replace(' ','-') : 'empty' %>'>
+            <%- tile ? tile.name : '[x]' %>
+            </div>
+          </td>
+        <% } %>
+      </tr>
+    <% } %>
+    </table>
+  <% } %>
+</form>
+
+<script>
+  $(document).live("pageinit", function() {
+    $('#map').Map({
+      gridElemId: 'grid',
+      nextTileElemId: 'next-tile',
+      abeyantTileElemId: 'abeyant-tile'
+    });
+  });
+</script>

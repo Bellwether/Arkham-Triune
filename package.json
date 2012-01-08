@@ -1,0 +1,14 @@
+{
+  "name": "ArkhamTriune",
+  "description": "A match-3 city sim set in Lovecraft Country Arkham",
+  "author": "Travis Dunn <cmd@travisdunn.com>",
+  "version": "0.1.0",
+  "dependencies": {		
+    "express": ">= 2.4.x",
+    "ejs": "0.4.x",
+    "mongoose": ">= 2.3.x",
+    "connect-assetmanager": "0.0.x"
+  },
+  "engine": "node >= 0.6.0",
+  "private": "true"
+}

@@ -1,0 +1,42 @@
+html, body {
+min-height:100%;	
+}
+* {
+background:transparent;
+border:0 none;
+font-size:100%;
+margin:0;
+outline:0;
+padding:0;
+vertical-align:top
+}
+ol, ul {
+list-style:none
+}
+blockquote, q {
+quotes:none
+}
+table, table td {
+border-collapse:collapse	
+border:none;
+padding:0;
+}
+a {
+color:inherit;	
+cursor:pointer;
+text-decoration:none;
+}
+a:hover, a:active, a:focus { outline: 0; }
+::-moz-selection { background: inherit; color: #fff; text-shadow: none; }
+::selection { background: inherit; color: #fff; text-shadow: none; }
+
+article, aside, details, figcaption, figure, footer, header, hgroup, nav, section { display: block; }
+audio, canvas, video { display: inline-block; *display: inline; *zoom: 1; }
+audio:not([controls]) { display: none; }
+[hidden], .hidden { display: none; }
+
+img { 
+border: 0; 
+-ms-interpolation-mode: bicubic; 
+vertical-align: top; 
+}
