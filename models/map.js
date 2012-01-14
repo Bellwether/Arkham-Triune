@@ -9,10 +9,11 @@ var monsters = require('./../lib/mechanics/monsters');
 var rewarder = require('./../lib/mechanics/rewarder');
 
 var struct = {
+  abeyantTileId: Schema.ObjectId,
   active: {type: Boolean, default: true},	
   cells: [cell.Struct],
+  moves: {type: Number, default: 0},
   nextTileId: Schema.ObjectId,
-  abeyantTileId: Schema.ObjectId,
   playerId: String,
   score: {type: Number, default: 0}
 }
@@ -61,38 +62,31 @@ schema.methods.awardPoints = function awardPoints(matchedTiles) {
   this.score = this.score + points;
   return points;
 }
+schema.methods.awardWisdom = function awardWisdom(points) {
+  var wisdom = 0;
+  return wisdom;
+}
 schema.methods.match = function match(index) {
   var matches = [index];
   matcher.matchNeighbors(this, index, matches);	
 	
   var matched = {matches: matches};	
-  if (matches.length >= 3) {	
-    var points = this.awardPoints(matched);	
-	    console.log("MATCH POINTS "+points)
+  if (matches.length >= 3) {
+    matched.points = this.awardPoints(matched);
+    matched.wisdom = this.awardWisdom(matched.points);
     var upgrade = this.upgradeCells(index, matches);
 
-console.log("UPGRADE "+JSON.stringify(upgrade)+" "+JSON.stringify(matched))
+console.log("MATCH and UPGRADE "+JSON.stringify(upgrade)+" "+JSON.stringify(matched))
     if (upgrade){
       matched.upgrade = upgrade.compressed;
-      var newMatched = this.match(index);
-console.log('newMatched for idx '+index+' = '+JSON.stringify(newMatched))
+      var deepMatched = this.match(index);
 
-      if (newMatched.matches.length >= 3) {
-	console.log(matched.matches.length)
-	    points = points + this.awardPoints(newMatched);
-	    console.log("MEGA MATCH POINTS "+points)
-	console.log("this.awardPoints(newMatched) = "+this.awardPoints(newMatched))
-	console.log("newMatched.points = "+newMatched.points)	
-        matched.matches = matched.matches.concat(newMatched.matches);
-	console.log(matched.matches.length)
-        if (newMatched.upgrade) matched.upgrade = newMatched.upgrade.compressed;
-
-  	console.log('MEGA UPGRADE '+JSON.stringify(newMatched.upgrade)+'!!!! '+ JSON.stringify(matched))
+      if (deepMatched.matches.length >= 3) {
+        matcher.mergeMatched(matched, deepMatched);
       }
-      matched.points = points;
     }
   }
-console.log("RETURNING "+JSON.stringify(matched.matches))
+console.log("RETURNING "+JSON.stringify(matched))
   return matched;
 }
 schema.methods.upgradeCells = function upgradeCells(index, matches) {
@@ -145,6 +139,9 @@ schema.methods.emplace = function emplace(index, callback) {
     var matched = this.match(index);
     this.dealTile();
     var movement = monsters.move(this, tile.Model.list, index);
+	
+    this.moves = this.moves + 1;
+    if (this.completed) this.complete();
 
     this.markModified("cells");
     this.save(function (err, doc) {
@@ -159,7 +156,10 @@ schema.statics.FindActive = function FindActive(playerId, callback) {
   var query = {playerId: playerId, active: true};
   return this.findOne(query, callback);
 }
-
+schema.statics.FindComplete = function FindComplete(playerId, callback) {
+  var query = {playerId: playerId, active: false};
+  return this.findOne(query, callback);
+}
 schema.statics.FindOrCreate = function FindOrCreate(playerId, callback) {
   var self = this;
   return this.FindActive(playerId, function(err, doc) {

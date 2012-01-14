@@ -15,6 +15,8 @@ routes = {
         var abeyant = doc.abeyantTile ? doc.abeyantTile.compressed : null;
         var next = doc.nextTile ? doc.nextTile.compressed : null;
         res.send({abeyant: abeyant, next: next});
+      } else if (doc && doc.completed) {
+        res.send({completed: doc.completed, url: '/maps/'+doc._id});
       } else if (doc) {
         var tile = doc.nextTile.compressed;
         res.send({tile: tile, matched: matches, monsters: monsters, removed: removed});
@@ -39,12 +41,17 @@ routes = {
 
     function onMapFound(err, doc) {
       if (doc) {
-        res.render('app/show', {map: doc, layout: 'app/layouts/dialog'});
+        res.render('map/show', {map: doc, layout: 'app/layouts/dialog'});
       } else {
         res.redirect('/')
       }	
 	}
     map.Model.FindComplete(playerId, onMapFound);
+  },
+
+  destroy: function(req, res) {
+	console.log('****')
+    res.redirect('/')
   }
 }
 Controller.prototype.Routes = routes;

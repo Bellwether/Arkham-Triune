@@ -14,26 +14,34 @@
       <input type='radio' name='abeyant' id='abeyant-radio-label' disabled='disabled' data-theme='c' />
       <label for='abeyant-radio-label' data-theme='c'>Suspended</label>
 
-      <input type='radio' name='abeyant' id='abeyant-radio-input' disabled='disabled' data-theme='c' checked='checked' />
+      <input type='radio' name='abeyant' id='abeyant-radio-input' data-theme='a' />
       <label id='abeyant-tile' for='abeyant-radio-input' data-theme='c'>
         <%- locals.map.abeyantTile ? locals.map.abeyantTile.name : '. . .' %>
       </label>
     </fieldset>
 
 	<fieldset data-role='controlgroup' data-type='horizontal' style='float:right'>
-      <input type='radio' name='score' id='score-radio-label' disabled='disabled' />
-      <label for='score-radio-label'>Score</label>
+      <input type='radio' name='score' id='score-radio-label' disabled='disabled' data-theme='d' />
+      <label for='score-radio-label' data-theme='d'>Score</label>
 
-      <input type='radio' name='score' id='score-radio-input' disabled='disabled' />
-      <label for='score-radio-input'><%= locals.map.score %></label>
+      <input type='radio' name='score' id='score-radio-input' disabled='disabled' data-theme='d' />
+      <label id='score' for='score-radio-input' data-theme='d'><%= locals.map.score %></label>
     </fieldset>
 
 	<fieldset data-role='controlgroup' data-type='horizontal' style='float:right;'>
-      <input type='radio' name='wisdom' id='wisdom-radio-label' disabled='disabled' />
-      <label for='wisdom-radio-label'>Wisdom</label>
+      <input type='radio' name='wisdom' id='wisdom-radio-label' disabled='disabled' data-theme='d' />
+      <label for='wisdom-radio-label' data-theme='d'>Wisdom</label>
 
-      <input type='radio' name='wisdom' id='wisdom-radio-input' disabled='disabled' />
-      <label for='wisdom-radio-input'>100</label>
+      <input type='radio' name='wisdom' id='wisdom-radio-input' disabled='disabled' data-theme='d' />
+      <label for='wisdom-radio-input' data-theme='d'>100</label>
+    </fieldset>
+
+	<fieldset data-role='controlgroup' data-type='horizontal' style='float:right;'>
+      <input type='radio' name='moves' id='moves-radio-label' disabled='disabled' data-theme='d' />
+      <label for='moves-radio-label' data-theme='d'>Moves</label>
+
+      <input type='radio' name='moves' id='moves-radio-input' disabled='disabled' data-theme='d' />
+      <label id='moves' for='moves-radio-input' data-theme='d'><%- locals.map.moves %></label>
     </fieldset>
   </h2>
 </div>

@@ -2,6 +2,7 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var struct = {
+  wisdom: {type: Number, default: 50}
 }
 var schema = new Schema(struct);
 

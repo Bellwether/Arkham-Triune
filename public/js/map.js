@@ -1,4 +1,38 @@
 (function ($) {
+  $.Moves = function(map, options) {
+    this.map = map;
+    this.moves = $('#'+options.movesElemId);
+  }	
+  $.Moves.prototype.label = function label() {
+    return this.moves.find('.ui-btn-text');
+  }
+  $.Moves.prototype.text = function text(val) {
+    if (val) {
+      var current = parseInt(this.text());
+      var updated = current + parseInt(val);
+      (this.label() || this.moves).html(updated);
+    } else {
+      return this.label() ? this.label().html() : this.moves.html();
+    }
+  }
+	
+  $.Score = function(map, options) {
+    this.map = map;
+    this.score = $('#'+options.scoreElemId);
+  }
+  $.Score.prototype.label = function label() {
+    return this.score.find('.ui-btn-text');
+  }
+  $.Score.prototype.text = function text(val) {
+    if (val) {
+      var current = parseInt(this.text());
+      var updated = current + parseInt(val);
+      (this.label() || this.score).html(updated);
+    } else {
+      return this.label() ? this.label().html() : this.score.html();
+    }
+  }
+
   $.AbeyantTile = function(map, options) {	
     this.map = map;
     this.tile = $('#'+options.abeyantTileElemId);
@@ -10,9 +44,14 @@
     this.container.removeClass('ui-disabled');
 
     this.container.click(function(e) {
+	console.log('test!!')
+	return;
       if (!self.active) return;
+
       self.container.addClass('ui-disabled');
       self.active = false;
+      map.deactivate();
+
       map.abeyant(function(data, textStatus) {
         if (data && data.abeyant) {
           self.text(data.abeyant.name);
@@ -20,7 +59,9 @@
         }
 	    self.container.removeClass('ui-disabled');
         self.active = true;
+        map.activate();
       })
+      return false;  
     })
   }
   $.AbeyantTile.prototype.isEmpty = function isEmpty() {
@@ -84,7 +125,7 @@
     this.cell.prepend(panel);
     this.slot = panel;
   }
-  $.MapCell.prototype.empty = function empty() {	
+  $.MapCell.prototype.empty = function empty() { 
     this.tile.attr('class', 'tile empty');
     this.tile.html('[x]');
     this.originalText = '[x]';
@@ -126,6 +167,9 @@
     map.nextTile = new $.NextTile(map, options);
     map.abeyantTile = new $.AbeyantTile(map, options);
     map.grid = $('#'+options.gridElemId);
+    map.score = new $.Score(map, options);
+    map.moves = new $.Moves(map, options);
+
     map.input = map.find('input[name="index"]');
     map.active = false;
     map.cells = [];
@@ -163,19 +207,27 @@
         console.log(JSON.stringify(textStatus)+' '+JSON.stringify(data))
 
         if (data.tile) {
-          cell.emplace({name: map.nextTile.text()});
+          if (!map.isUsingMagic()) cell.emplace({name: map.nextTile.text()});
           map.nextTile.text(data.tile.name);
+          map.moves.text(1);
         }
         if (data.matched) {
           map.match(cell.index, data.matched);
 
           if (data.matched.points) {
+            map.score.text(data.matched.points);
           }
         }
-        if (data.monsters && data.monsters.trapped) {
-          for (var i = 0; i < data.monsters.trapped.length; i++) {
-            var tile = data.monsters.trapped[i].tile;
-            map.cells[data.monsters.trapped[i].index].update(tile.name.replace(' ','-'), tile.name);
+        if (data.monsters) {
+          if (data.monsters.trapped) {
+            var monsters = data.monsters.trapped.matches;
+            for (var i = 0; i < monsters.length; i++) {
+              var tile = monsters[i].tile;
+              map.cells[monsters[i].index].update(tile.name.replace(' ','-'), tile.name);
+            }
+          }
+          if (data.monsters.upgraded) {
+            map.match(data.monsters.upgraded.index, data.monsters.upgraded);
           }
         }
         if (data.monsters && data.monsters.moves) {
@@ -196,6 +248,14 @@
           for (var i = 0; i < data.removed.length; i++) {
             map.cells[data.removed[i]].update('tile empty', '[x]');
           }
+        };
+        if (data.completed) {
+          $.mobile.changePage(data.url, {
+            transition: 'pop',
+            reloadPage: true,
+            role: 'dialog'
+          });
+          return;
         }
         map.activate();
       }
@@ -221,4 +281,42 @@
 
     return map;
   }
-})(jQuery);	
+
+  $(document).ready(function() {
+    function restartMap(e) {
+      e.preventDefault();
+
+	  $(this).simpledialog({
+	    'mode' : 'bool',
+	    'prompt' : "Are you certain you wish to restart?",
+	    'subTitle': "If you start your town over, all progress will be lost forever.",
+	    'useModal': true,
+	    'buttons' : {
+	      'Restart': {
+	        click: function () { $('#restart').submit(); },
+	        icon: "refresh"
+	      },
+	      'Cancel': {
+            click: function () {},
+	        icon: "delete",
+	        theme: "c"
+	      }
+	    }
+	  })
+    }
+	
+	$('#restart-button').live('click', restartMap);
+  })
+
+  $(document).bind("pagechange", function() {
+   $('#map').Map({
+      gridElemId: 'grid',
+      nextTileElemId: 'next-tile',
+      abeyantTileElemId: 'abeyant-tile',
+      scoreElemId: 'score',
+      wisdomElemId: 'wisdom',
+      movesElemId: 'moves'
+    });
+
+  });
+})(jQuery);

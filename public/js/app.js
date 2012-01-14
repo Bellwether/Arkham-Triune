@@ -33,3 +33,14 @@ $(document).ready(function() {
     });
   }
 });
+
+$(document).bind("mobileinit", function() {
+	console.log('mobileinit')
+  //apply overrides here
+});
+
+$( 'div[data-role="page"]' ).live( 'pagehide',function(event, ui){
+  $(this).remove();
+  console.log('removed');
+
+});
