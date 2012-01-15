@@ -1,5 +1,5 @@
 <li data-icon='star' data-theme='c'>
-  <a href='' class="<%- item.wisdom > locals.wisdom ? 'ui-disabled' : '' %>">
+  <a href='/items/<%- item._id %>' class="<%- item.wisdom > locals.wisdom ? 'ui-disabled' : '' %>">
     <img src='apple-touch-icon.png' />
     <h3><%- item.name %></h3>
     <p>Purchase this tile with <strong><%- item.wisdom %></strong> wisdom</p>

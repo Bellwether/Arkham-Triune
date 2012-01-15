@@ -2,6 +2,7 @@
 
   $(document).ready(function() {
     function purchaseItem(e) {
+	console.log('purchaseItem')
       e.preventDefault();
 
       var link = $(this);
@@ -15,7 +16,7 @@
 	    'useModal': true,
 	    'buttons' : {
 	      'Purchase': {
-	        click: function () {},
+	        click: function () { link.unbind('click', purchaseItem).click(); console.log('buy') },
 	        icon: "star"
 	      },
 	      'Cancel': {

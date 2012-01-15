@@ -10,7 +10,7 @@ routes = {
   index: function(req, res) {
     var playerId = req.authentication.playerId;
 
-    var player = Player.Find(playerId, function(err, doc) {
+    Player.Find(playerId, function(err, doc) {
       var opts = {layout: 'app/layouts/dialog', title: 'Starry Wisdom Bazaar'};
       opts.items = item.Model.list;
       opts.wisdom = doc ? doc.wisdom : 0;
@@ -20,6 +20,11 @@ routes = {
 
   show: function(req, res) {
     var playerId = req.authentication.playerId;
+    var itemId = req.params.id;
+
+    item.Model.Purchase(playerId, itemId, function(err, doc) {
+      res.redirect('/')
+    })
   }
 }
 Controller.prototype.Routes = routes;
