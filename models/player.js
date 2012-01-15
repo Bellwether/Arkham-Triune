@@ -6,6 +6,10 @@ var struct = {
 }
 var schema = new Schema(struct);
 
+schema.statics.Find = function Find(playerId, callback) {
+  var query = {_id: playerId};
+  return this.findOne(query, callback);
+}
 schema.statics.Create = function Create(params, callback) {
   params = params || {};
   var player = new this();

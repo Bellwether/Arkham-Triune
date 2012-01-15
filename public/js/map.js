@@ -44,8 +44,6 @@
     this.container.removeClass('ui-disabled');
 
     this.container.click(function(e) {
-	console.log('test!!')
-	return;
       if (!self.active) return;
 
       self.container.addClass('ui-disabled');
@@ -151,9 +149,15 @@
   }
   $.MapCell.prototype.emplace = function emplace(tile) {	
     this.tile.removeClass('empty');
-    this.tile.addClass(tile.name.replace(' ','-'));
+    this.tile.addClass(tile.name.replace(/\s/,'-'));
     this.tile.html(tile.name);
     this.originalText = tile.name;
+  }
+  $.MapCell.prototype.bless = function bless() {
+    this.tile.removeClass('cursed');
+  }
+  $.MapCell.prototype.curse = function curse() {
+    this.tile.addClass('cursed');	
   }
   $.MapCell.prototype.update = function update(classAttr, text) {	
     this.tile.attr('class', classAttr);
@@ -164,6 +168,8 @@
   $.fn.Map = function(options) {
     options = options || {};
     var map = $(this);
+    if (!map.length) return false;
+
     map.nextTile = new $.NextTile(map, options);
     map.abeyantTile = new $.AbeyantTile(map, options);
     map.grid = $('#'+options.gridElemId);
@@ -207,7 +213,11 @@
         console.log(JSON.stringify(textStatus)+' '+JSON.stringify(data))
 
         if (data.tile) {
-          if (!map.isUsingMagic()) cell.emplace({name: map.nextTile.text()});
+          if (map.isUsingMagic()) {
+            cell.empty();
+          } else { 
+            cell.emplace({name: map.nextTile.text()});
+          }
           map.nextTile.text(data.tile.name);
           map.moves.text(1);
         }
@@ -243,6 +253,24 @@
             mover.update(targetClass, targetText);
             target.update(moverClass, moverText);
           }
+        }
+        if (data.monsters && data.monsters.summonings) {
+          console.log(JSON.stringify(data.monsters.summonings));
+          for (var i = 0; i < data.monsters.summonings.length; i++) {
+            var summoning = data.monsters.summonings[i];
+            map.cells[summoning.move[0]].empty();
+            map.cells[summoning.move[1]].emplace({name: summoning.name});
+          }
+        }
+        if (data.monsters && data.monsters.removed) {
+          for (var i = 0; i < data.monsters.removed.length; i++) {
+            map.cells[data.monsters.removed[i]].empty();
+          }	
+        }
+        if (data.monsters && data.monsters.blessings) {
+          for (var i = 0; i < data.monsters.blessings.length; i++) {
+            map.cells[data.monsters.blessings[i]].bless();
+          }	
         }
         if (data.removed) {
           for (var i = 0; i < data.removed.length; i++) {
@@ -317,6 +345,5 @@
       wisdomElemId: 'wisdom',
       movesElemId: 'moves'
     });
-
   });
 })(jQuery);

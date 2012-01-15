@@ -3,7 +3,13 @@
   <head>
   </head>
   <body>
-    <div data-role='dialog' data-theme='a' data-id=''>
+    <div data-role='dialog' data-url='<%- currentUrl %>' data-theme='a' data-id='' data-dom-cache='false'>
+	<div data-role='header' data-id='main-header' data-title=''>
+      <h1><%- locals.title %></h1>
+      <% if (locals.items) { %>
+        <div class="ui-btn-right"><%- locals.wisdom %> Wisdom</div>
+      <% } %>
+	</div>
       <div data-role='content' class='ui-content'>	
         <%- body %>
       </div>

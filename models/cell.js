@@ -2,6 +2,7 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var struct = {
+  cursed: Boolean,
   tileId: Schema.ObjectId
 }
 var schema = new Schema(struct);

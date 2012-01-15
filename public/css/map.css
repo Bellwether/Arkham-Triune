@@ -31,7 +31,14 @@ width:100%;
 
 
 
-
-.Cultist {
+.Cultist, .Witch, .Magus, .Servitor {
 color:red;	
+}
+
+.Cats-of {
+color:blue;
+}
+
+.cursed {
+color:#666;
 }

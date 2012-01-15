@@ -7,6 +7,7 @@ var dealer = require('./../lib/mechanics/dealer');
 var matcher = require('./../lib/mechanics/matcher');
 var monsters = require('./../lib/mechanics/monsters');
 var rewarder = require('./../lib/mechanics/rewarder');
+var Turn = require('./turn').Model;
 
 var struct = {
   abeyantTileId: Schema.ObjectId,
@@ -19,7 +20,7 @@ var struct = {
 }
 var schema = new Schema(struct);
 schema.virtual('size').get(function () {
-  return 6;
+  return 7;
 });
 schema.virtual('completed').get(function () {
   for (var i = 0; i < this.cells.length; i++) {
@@ -56,6 +57,15 @@ schema.methods.tileAt = function tileAt(index) {
 }
 schema.methods.dealTile = function dealTile() {
   this.nextTileId = dealer.deal(tile.Model.list)._id;
+}
+schema.methods.placeNextTile = function placeNextTile(index) {
+  var cell = this.cellAt(index);
+  if (cell && cell.empty) {	
+    this.cells[index].tileId = this.nextTileId;	
+    return true;
+  } else {
+    return false;	
+  }
 }
 schema.methods.awardPoints = function awardPoints(matchedTiles) {
   var points = rewarder.award(this, matchedTiles.matches);
@@ -133,16 +143,30 @@ schema.methods.emplace = function emplace(index, callback) {
   index = parseInt(index);
   if (this.nextTile.magic) return this.useMagic(index, callback);
 
+	//   if (this.placeNextTile(index)) {
+	// var turn = new Turn();
+	// this.dealTile();
+	// turn.addNextTile(this.nextTile);
+	// 
+	//     this.markModified("cells");
+	//     this.save(function (err, doc) {
+	//       callback(err, doc, turn.serialize);
+	//     });	
+	//   } else {
+	//     callback("no cell available at "+index);
+	//   }
+
+
   var cell = this.cellAt(index);
   if (cell && cell.empty) {
     this.cells[index].tileId = this.nextTileId;
     var matched = this.match(index);
     this.dealTile();
     var movement = monsters.move(this, tile.Model.list, index);
-	
+    	
     this.moves = this.moves + 1;
     if (this.completed) this.complete();
-
+  
     this.markModified("cells");
     this.save(function (err, doc) {
       callback(err, doc, matched, movement);

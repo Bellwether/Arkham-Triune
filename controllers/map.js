@@ -50,8 +50,13 @@ routes = {
   },
 
   destroy: function(req, res) {
-	console.log('****')
-    res.redirect('/')
+    var playerId = req.authentication.playerId;	
+
+    function onMapFound(err, doc) {
+      if (doc) doc.remove();
+      res.redirect('/');
+	}
+    map.Model.FindActive(playerId, onMapFound);
   }
 }
 Controller.prototype.Routes = routes;

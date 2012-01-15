@@ -1,0 +1,13 @@
+<form id='items' action='/items' method='post'>
+  <label for='id' class='ui-hidden-accessible'></label>
+  <input type='hidden' name='id' value='' />
+
+  <center>
+    <ul id='bazaar' data-role="listview" data-theme="g">
+      <li data-icon='none' data-theme='a'>
+        <strong>You can spend your wisdom to immediately place a purchased tile.</strong>
+      </li>
+	  <%- partial('item/partials/item', locals.items) %>
+    </ul>
+  </center>
+<form>

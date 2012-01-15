@@ -1,0 +1,34 @@
+[
+  {
+    name: "Elder Sign",
+    wisdom: 50
+  },
+  {
+    name: "Mythos Tome",
+    wisdom: 100
+  },
+  {
+    name: "Pasture",
+    wisdom: 15
+  },
+  {
+    name: "Cottage",
+    wisdom: 15
+  },
+  {
+    name: "Farmstead",
+    wisdom: 30
+  },
+  {
+    name: "Cape Code",
+    wisdom: 30
+  },
+  {
+    name: "Mission",
+    wisdom: 25
+  },
+  {
+    name: "Union Hall",
+    wisdom: 25
+  }
+]

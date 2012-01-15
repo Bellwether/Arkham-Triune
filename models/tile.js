@@ -22,6 +22,10 @@ schema.virtual('monster').get(function () {
 schema.virtual('magic').get(function () {
   return this.group === 'magic';
 });
+schema.virtual('summoning').get(function () {
+  return this.group === 'summoning';
+});
+
 schema.virtual('compressed').get(function () {
   return {_id: this._id, name: this.name, group: this.group};
 });
@@ -37,6 +41,9 @@ schema.methods.matchPoints = function matchPoints(matchCount) {
   } else {
     return 0;	
   }
+}
+schema.methods.nextUpgrade = function nextUpgrade() {
+  return model.nextUpgrade(this._id);
 }
 schema.statics.nextUpgrade = function nextUpgrade(tileId) {
   var tile = this.lookups[tileId];

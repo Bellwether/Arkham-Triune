@@ -32,15 +32,12 @@ $(document).ready(function() {
     .done(function(data, textStatus, jqXHR) {
     });
   }
+
 });
 
-$(document).bind("mobileinit", function() {
-	console.log('mobileinit')
-  //apply overrides here
+$(document).bind('mobileinit', function() {
 });
 
-$( 'div[data-role="page"]' ).live( 'pagehide',function(event, ui){
+$('div[data-role="page"]').live('pagehide',function(event, ui) {
   $(this).remove();
-  console.log('removed');
-
 });

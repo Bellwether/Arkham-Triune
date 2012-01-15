@@ -107,10 +107,31 @@
     points: 125
   },
   {
-    name: "Cultist",
+    name: "Cats of Ulthar",
     group: "monster",
     level: 1,
     weight: 10
+  },
+  {
+    name: "Cultist",
+    group: "monster",
+    level: 1,
+    weight: 20
+  },
+  {
+    name: "Witch",
+    group: "monster",
+    level: 2
+  },
+  {
+    name: "Magus",
+    group: "monster",
+    level: 3
+  },
+  {
+    name: "Servitor",
+    group: "monster",
+    level: 4
   },
   {
     name: "Magic Pentagram",
