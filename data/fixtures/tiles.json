@@ -6,6 +6,12 @@
     weight: 5
   },
   {
+    name: "Silver Key",
+    group: "magic",
+    level: 1,
+    weight: 20
+  },
+  {
     name: "Mission",
     group: "religion",
     level: 1,
@@ -110,13 +116,13 @@
     name: "Cats of Ulthar",
     group: "monster",
     level: 1,
-    weight: 10
+    weight: 5
   },
   {
     name: "Cultist",
     group: "monster",
     level: 1,
-    weight: 20
+    weight: 10
   },
   {
     name: "Witch",

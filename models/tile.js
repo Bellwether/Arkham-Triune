@@ -10,11 +10,13 @@ var struct = {
 }
 var schema = new Schema(struct);
 
-schema.virtual('seedable').get(function () {
-  return parseInt(this.level) === 1 &&
-         this.group !== 'monster' &&
+schema.virtual('landscape').get(function () {
+  return this.group !== 'monster' &&
          this.group !== 'summoning' &&
-         this.group !== 'magic';
+         this.group !== 'magic';	
+});
+schema.virtual('seedable').get(function () {
+  return parseInt(this.level) === 1 && landscape;
 });
 schema.virtual('monster').get(function () {
   return this.group === 'monster';

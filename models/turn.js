@@ -31,6 +31,10 @@ var struct = {
     moves: [Path],
     summonings: [Summoning]
   },
+  enchanted: {
+    blessed: [Number],	
+    cursed: [Number]
+  },
   removed: [Number],
   points: Number,
   wisdom: Number,
@@ -52,6 +56,8 @@ schema.virtual('serialize').get(function() {
   if (this.removed.length) json.removed = this.removed;
   if (this.points) json.points = this.points;
   if (this.wisdom) json.wisdom = this.wisdom;
+  if (this.enchanted.blessed.length||this.enchanted.cursed.length) json.enchanted = this.enchanted;
+
   if (this.nextTile) json.nextTile = this.nextTile;
   return json;
 });

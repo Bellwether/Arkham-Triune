@@ -76,7 +76,7 @@ schema.methods.awardWisdom = function awardWisdom(points) {
   var wisdom = 0;
   return wisdom;
 }
-schema.methods.match = function match(index) {
+schema.methods.match = function match(index, matchOnly) {
   var matches = [index];
   matcher.matchNeighbors(this, index, matches);	
 	
@@ -84,12 +84,12 @@ schema.methods.match = function match(index) {
   if (matches.length >= 3) {
     matched.points = this.awardPoints(matched);
     matched.wisdom = this.awardWisdom(matched.points);
-    var upgrade = this.upgradeCells(index, matches);
+    var upgrade = matchOnly ? {} : this.upgradeCells(index, matches);
 
 console.log("MATCH and UPGRADE "+JSON.stringify(upgrade)+" "+JSON.stringify(matched))
     if (upgrade){
       matched.upgrade = upgrade.compressed;
-      var deepMatched = this.match(index);
+      var deepMatched = this.match(index, matchOnly);
 
       if (deepMatched.matches.length >= 3) {
         matcher.mergeMatched(matched, deepMatched);
@@ -115,17 +115,83 @@ schema.methods.complete = function complete() {
   this.active = false;
 }
 schema.methods.useMagic = function useMagic(index, callback) {
+  var removed = null;
+  var matched = null;
+
+  if (this.nextTile.name == 'Elder Sign') {
+    removed = this.useElderSign(index);
+  } else if (this.nextTile.name == 'Silver Key') {
+    matched = this.useSilverKey(index);
+  }
+
+console.log("using MAGIC *** "+JSON.stringify(removed)+ ' --- '+JSON.stringify(matched))
+
+  this.dealTile();
+  this.markModified("cells");
+  this.save(function (err, doc) {
+    callback(err, doc, matched, null, removed);
+  });
+}
+schema.methods.useElderSign = function useElderSign(index) {
   var cell = this.cellAt(index);
+	
   var removed = null;
   if (cell && !cell.empty) {
     this.cells[index].tileId = null;
     removed = [index];
   }
-  this.dealTile();
-  this.markModified("cells");
-  this.save(function (err, doc) {
-    callback(err, doc, null, null, removed);
-  });
+  return removed;
+}
+schema.methods.useSilverKey = function useSilverKey(index) {
+  this.moves = this.moves + 1;
+
+console.log('key empty? '+this.cellAt(index).empty+ ' at '+index+' ')
+  if (!this.cellAt(index).empty) return;
+
+  var indices = this.cellIndicesAt(index);
+  var neighbors = [];
+  if (indices.hasTop && !this.cellAt(indices.top).empty && this.tileAt(indices.top).landscape) neighbors.push(indices.top);
+  if (indices.hasLeft && !this.cellAt(indices.left).empty && this.tileAt(indices.left).landscape) neighbors.push(indices.left);
+  if (indices.hasBottom && !this.cellAt(indices.bottom).empty && this.tileAt(indices.bottom).landscape) neighbors.push(indices.bottom);
+  if (indices.hasRight && !this.cellAt(indices.right).empty && this.tileAt(indices.right).landscape) neighbors.push(indices.right);
+
+console.log('key neighbors '+JSON.stringify(neighbors))
+  if (neighbors.length === 0) return;
+
+  var wildcard = null;
+  var possibleMatches = [];
+  for (var i = 0; i < neighbors.length; i++) {	
+    this.cells[index].tileId = neighbors[i];
+	var matched = this.match(index, true);
+	possibleMatches.push(matched.matches || []);
+  }
+
+  var bestMatch = 0;
+  for (var i = 0; i < neighbors.length; i++) {
+    if (wildcard === null) {
+      wildcard = neighbors[i];
+    } else {
+      if (possibleMatches[i].length > possibleMatches[bestMatch].length ||
+         (possibleMatches[i].length === possibleMatches[bestMatch].length &&
+	      this.tileAt(neighbors[i]).points > this.tileAt(neighbors[bestMatch]).points)) {
+        bestMatch = i;
+	  }
+    }
+console.log('key matching wildcard '+wildcard+' best match is '+bestMatch)
+console.log('key matching match '+JSON.stringify(possibleMatches[i]))
+console.log('key matching points '+this.tileAt(neighbors[i]).points)
+
+// console.log('points '+this.tileAt(wildcard).points+' vs. '+this.tileAt(neighbors[i]).points + ' and size '+possibleMatches[i].length+ '>'+ possibleMatches[wildcard].length)
+  }
+  wildcard = neighbors[bestMatch];
+
+  this.cells[index].tileId = this.cells[wildcard].tileId;
+  var matched = this.match(index);
+  var tile = this.tileAt(index).compressed;
+  matched.placedTile = tile;
+
+console.log('key matched '+JSON.stringify(matched))
+  return matched;
 }
 schema.methods.swapAbeyant = function swapAbeyant(callback) {
   var abeyantId = this.abeyantTileId;

@@ -212,11 +212,11 @@
       function onPlacement(data, textStatus) {
         console.log(JSON.stringify(textStatus)+' '+JSON.stringify(data))
 
-        if (data.tile) {
+        if (data.tile) { // general success
           if (map.isUsingMagic()) {
             cell.empty();
           } else { 
-            cell.emplace({name: map.nextTile.text()});
+            cell.emplace({name: map.nextTile.text()}); // place tile
           }
           map.nextTile.text(data.tile.name);
           map.moves.text(1);
@@ -227,6 +227,9 @@
           if (data.matched.points) {
             map.score.text(data.matched.points);
           }
+        }
+        if (data.matched && data.matched.placedTile) {
+          cell.emplace(data.matched.placedTile);
         }
         if (data.monsters) {
           if (data.monsters.trapped) {
