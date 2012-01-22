@@ -15,6 +15,10 @@ schema.virtual('landscape').get(function () {
          this.group !== 'summoning' &&
          this.group !== 'magic';	
 });
+schema.virtual('matchable').get(function () {
+  return this.group !== 'monster' &&
+         this.group !== 'magic';	
+});
 schema.virtual('seedable').get(function () {
   return parseInt(this.level) === 1 && this.landscape;
 });
@@ -43,7 +47,7 @@ schema.methods.matchPoints = function matchPoints(matchCount) {
     return this.points * 3;
   } else if (matchCount === 4) {
     return (this.points * 4) * 2;
-  } else if (matchCount === 5) {
+  } else if (matchCount >= 5) {
     return (this.points * 5) * 3;
   } else {
     return 0;	

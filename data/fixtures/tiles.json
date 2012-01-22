@@ -9,13 +9,13 @@
     name: "Silver Key",
     group: "magic",
     level: 1,
-    weight: 0
+    weight: 20
   },
   {
     name: "Mythos Tome",
     group: "magic",
     level: 1,
-    weight: 20
+    weight: 10
   },
   {
     name: "Mission",

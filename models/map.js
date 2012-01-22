@@ -204,10 +204,26 @@ schema.methods.useSilverKey = function useSilverKey(turn) {
     }
 	console.log('compareMatch '+firstMatchCount+' > '+secondMatchCount+' between first '+JSON.stringify(first)+' and second '+JSON.stringify(first))
 	
-	return firstMatchCount >= secondMatchCount ? first : second;
+    var compareByPoints = firstMatchCount > 0 && firstMatchCount === secondMatchCount;
+	if (compareByPoints) {
+      var firstMatchPoints = 0;
+      var secondMatchPoints = 0;
+
+      first.forEach(function(match) {		
+        firstMatchPoints = firstMatchPoints + tile.Model.lookups[match.tile._id].points;
+      });
+      second.forEach(function(match) {		
+        secondMatchPoints = secondMatchPoints + tile.Model.lookups[match.tile._id].points;
+      });
+
+      return firstMatchPoints >= secondMatchPoints ? first : second;
+	} else {
+	  return firstMatchCount >= secondMatchCount ? first : second;
+    }
   }
   
   var bestMatch = null;
+  var bestNeighborTileId = null;
   var self = this;
   neighbors.forEach(function(i) {	
     var matches = [];
@@ -217,22 +233,26 @@ schema.methods.useSilverKey = function useSilverKey(turn) {
     }
 
     if (matches.length > 0) {
-      var finalMatchIndex = matches.length - 1;
-      var match = matches[finalMatchIndex];
 console.log('--- comparing key matches '+JSON.stringify(matches)+ ' ------ '+JSON.stringify(bestMatch))
       bestMatch = compareMatch(matches, bestMatch);
-console.log('BEST TILE is '+JSON.stringify(bestMatch[0].tile))
-      self.cells[index].tileId = bestMatch[0].tile._id;
+	
+console.log('BEST TILE is '+JSON.stringify(bestMatch[0].tile)+' FROM '+JSON.stringify(self.tileAt(bestMatch[0].cells[0]) ))
     }
   });
 
   if (bestMatch) {
-console.log('upgrading key best match '+JSON.stringify(bestMatch))	
+    // bestMatch.reverse();
+console.log('upgrading key best match ::::::::::::: '+JSON.stringify(bestMatch))	
 
-    bestMatch.reverse();
+    var aNeighborIndex = bestMatch[0].cells[0];
+    var bestMatchTileId = self.tileAt(aNeighborIndex)._id;
+    self.cells[index].tileId = bestMatchTileId;
+
+console.log('+++++  UPGRADING TO BEST TILE ('+bestMatchTileId+') '+JSON.stringify(bestMatch[0].tile)+' FROM '+JSON.stringify(self.tileAt(bestMatch[0].cells[0]) ))
+
     turn.matched = bestMatch;
     this.upgradeTurnMatched(turn);
-	console.log('upgrading key best match '+JSON.stringify(turn))
+	console.log('@@@@@ @@@@@@@@ upgrading key best match '+JSON.stringify(turn))
   } else {
     var failedKeyTile = tile.Model.findByName("Magic Pentagram");
     this.cells[index].tileId = failedKeyTile._id;
@@ -265,7 +285,7 @@ schema.methods.swapSuspended = function swapSuspended(callback) {
 
 schema.methods.useTile = function useTile(turn, callback) {
   if (this.placeNextTile(turn.index)) {
-    if (this.tileAt(turn.index).landscape) {
+    if (this.tileAt(turn.index).matchable) {
       this.matchCells(turn);
     }
     monsters.act(this, turn);
