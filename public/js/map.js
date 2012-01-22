@@ -33,9 +33,9 @@
     }
   }
 
-  $.AbeyantTile = function(map, options) {	
+  $.SuspendedTile = function(map, options) {	
     this.map = map;
-    this.tile = $('#'+options.abeyantTileElemId);
+    this.tile = $('#'+options.suspendedTileElemId);
     this.container = this.tile.parents('.ui-radio');
 
     this.active = true;
@@ -50,9 +50,9 @@
       self.active = false;
       map.deactivate();
 
-      map.abeyant(function(data, textStatus) {
-        if (data && data.abeyant) {
-          self.text(data.abeyant.name);
+      map.suspended(function(data, textStatus) {
+        if (data && data.suspended) {
+          self.text(data.suspended.name);
           self.map.nextTile.text(data.next.name);
         }
 	    self.container.removeClass('ui-disabled');
@@ -62,13 +62,13 @@
       return false;  
     })
   }
-  $.AbeyantTile.prototype.isEmpty = function isEmpty() {
+  $.SuspendedTile.prototype.isEmpty = function isEmpty() {
     return this.text().replace(' ','').replace('.','').length > 0;
   }
-  $.AbeyantTile.prototype.label = function label() {
+  $.SuspendedTile.prototype.label = function label() {
     return this.tile.find('.ui-btn-text');
   }
-  $.AbeyantTile.prototype.text = function text(val) {
+  $.SuspendedTile.prototype.text = function text(val) {
     if (val) {
       (this.label() || this.tile).html(val);
     } else {
@@ -171,7 +171,7 @@
     if (!map.length) return false;
 
     map.nextTile = new $.NextTile(map, options);
-    map.abeyantTile = new $.AbeyantTile(map, options);
+    map.suspendedTile = new $.SuspendedTile(map, options);
     map.grid = $('#'+options.gridElemId);
     map.score = new $.Score(map, options);
     map.moves = new $.Moves(map, options);
@@ -193,17 +193,40 @@
       }
       map.cells[index].emplace(matched.upgrade);
     }
-    map.abeyant = function abeyant(callback) {
-      if (map.nextTile.text() === map.abeyantTile.text()) callback();
+    map.suspended = function suspended(callback) {
+      if (map.nextTile.text() === map.suspendedTile.text()) callback();
 
       $.sendRequest({
         url: map.attr('action'),
-        data: {abeyant: true},
+        data: {suspended: true},
       }, callback);
     }
-	
+
+    map.moveCell = function moveCell(from, to) {	
+      var mover = map.cells[from];
+      var target = map.cells[to];
+      var moverClass = mover.tile.attr('class');
+      var targetClass = target.tile.attr('class');
+      var moverText = mover.tile.html();
+      var targetText = target.tile.html();
+  
+      mover.update(targetClass, targetText);
+      target.update(moverClass, moverText);
+    }	
+    map.isRemoving = function isRemoving() {	
+      var title = map.nextTile.text();
+      return title.indexOf('Elder Sign') > -1;	
+    }
+    map.isTargetingMagic = function isTargetingMagic() {
+      var title = map.nextTile.text();
+      return title.indexOf('Elder Sign') > -1 ||
+             title.indexOf('Mythos Tome') > -1;	
+    };
     map.isUsingMagic = function isUsingMagic() {
-      return map.nextTile.text().indexOf('Elder Sign') > -1;
+      var title = map.nextTile.text();
+      return title.indexOf('Elder Sign') > -1 ||
+             title.indexOf('Mythos Tome') > -1;
+             title.indexOf('Silver Key') > -1;
     }	
     map.emplace = function emplace(cell) {
       map.deactivate();
@@ -212,75 +235,119 @@
       function onPlacement(data, textStatus) {
         console.log(JSON.stringify(textStatus)+' '+JSON.stringify(data))
 
-        if (data.tile) { // general success
-          if (map.isUsingMagic()) {
+        // if (data.tile) { // general success
+        //   if (map.isUsingMagic()) {
+        //     cell.empty();
+        //   } else { 
+        //     cell.emplace({name: map.nextTile.text()}); // place tile
+        //   }
+        //   map.nextTile.text(data.tile.name);
+        //   map.moves.text(1);
+        // }
+        // if (data.matched) {
+        //   map.match(cell.index, data.matched);
+        // 
+        //   if (data.matched.points) {
+        //     map.score.text(data.matched.points);
+        //   }
+        // }
+        // if (data.matched && data.matched.placedTile) {
+        //   cell.emplace(data.matched.placedTile);
+        // }
+        // if (data.monsters) {
+        //   if (data.monsters.trapped) {
+        //     var monsters = data.monsters.trapped.matches;
+        //     for (var i = 0; i < monsters.length; i++) {
+        //       var tile = monsters[i].tile;
+        //       map.cells[monsters[i].index].update(tile.name.replace(' ','-'), tile.name);
+        //     }
+        //   }
+        //   if (data.monsters.upgraded) {
+        //     map.match(data.monsters.upgraded.index, data.monsters.upgraded);
+        //   }
+        // }
+        // if (data.monsters && data.monsters.moves) {
+        //   for (var i = 0; i < data.monsters.moves.length; i++) {
+        //     var fromToTuple = data.monsters.moves[i];
+        //     var mover = map.cells[fromToTuple[0]];
+        //     var target = map.cells[fromToTuple[1]];
+        //     var moverClass = mover.tile.attr('class');
+        //     var targetClass = target.tile.attr('class');
+        //     var moverText = mover.tile.html();
+        //     var targetText = target.tile.html();
+        // 
+        //     mover.update(targetClass, targetText);
+        //     target.update(moverClass, moverText);
+        //   }
+        // }
+        // if (data.monsters && data.monsters.summonings) {
+        //   console.log(JSON.stringify(data.monsters.summonings));
+        //   for (var i = 0; i < data.monsters.summonings.length; i++) {
+        //     var summoning = data.monsters.summonings[i];
+        //     map.cells[summoning.move[0]].empty();
+        //     map.cells[summoning.move[1]].emplace({name: summoning.name});
+        //   }
+        // }
+        // if (data.monsters && data.monsters.removed) {
+        //   for (var i = 0; i < data.monsters.removed.length; i++) {
+        //     map.cells[data.monsters.removed[i]].empty();
+        //   }	
+        // }
+        // if (data.monsters && data.monsters.blessings) {
+        //   for (var i = 0; i < data.monsters.blessings.length; i++) {
+        //     map.cells[data.monsters.blessings[i]].bless();
+        //   }	
+        // }
+        // if (data.removed) {
+        //   for (var i = 0; i < data.removed.length; i++) {
+        //     map.cells[data.removed[i]].update('tile empty', '[x]');
+        //   }
+        // };
+        if (data.nextTile) {
+          map.nextTile.text(data.nextTile.name);
+        }
+        if (data.placed) {
+          var tile = data.placed.tile;
+          if (tile) {
+            map.moves.text(1);	
+            cell.emplace(tile);
+          } else {		
             cell.empty();
-          } else { 
-            cell.emplace({name: map.nextTile.text()}); // place tile
           }
-          map.nextTile.text(data.tile.name);
-          map.moves.text(1);
         }
         if (data.matched) {
-          map.match(cell.index, data.matched);
-
-          if (data.matched.points) {
-            map.score.text(data.matched.points);
+          for (var i = 0; i < data.matched.length; i++) {
+            for (var j = 0; j < data.matched[i].cells.length; j++) {	
+              map.cells[data.matched[i].cells[j]].empty();
+            };
+            map.cells[data.matched[i].index].emplace(data.matched[i].tile);
           }
         }
-        if (data.matched && data.matched.placedTile) {
-          cell.emplace(data.matched.placedTile);
+        if (data.points) {
+          map.score.text(data.points);
         }
-        if (data.monsters) {
-          if (data.monsters.trapped) {
-            var monsters = data.monsters.trapped.matches;
-            for (var i = 0; i < monsters.length; i++) {
-              var tile = monsters[i].tile;
-              map.cells[monsters[i].index].update(tile.name.replace(' ','-'), tile.name);
+        if (data.wisdom) {
+          map.wisdom.text(data.wisdom);
+        }
+        if (data.moved) {
+          if (data.moved.moves) {
+            for (var i = 0; i < data.moved.moves.length; i++) {
+              var path = data.moved.moves[i].path;
+              map.moveCell(path[0], path[1]);
             }
           }
-          if (data.monsters.upgraded) {
-            map.match(data.monsters.upgraded.index, data.monsters.upgraded);
+        }
+        if (data.trapped) {
+          for (var i = 0; i < data.trapped.traps.length; i++) {
+            map.cells[data.trapped.traps[i]].emplace(data.trapped.tile);
           }
-        }
-        if (data.monsters && data.monsters.moves) {
-          for (var i = 0; i < data.monsters.moves.length; i++) {
-            var fromToTuple = data.monsters.moves[i];
-            var mover = map.cells[fromToTuple[0]];
-            var target = map.cells[fromToTuple[1]];
-            var moverClass = mover.tile.attr('class');
-            var targetClass = target.tile.attr('class');
-            var moverText = mover.tile.html();
-            var targetText = target.tile.html();
-
-            mover.update(targetClass, targetText);
-            target.update(moverClass, moverText);
-          }
-        }
-        if (data.monsters && data.monsters.summonings) {
-          console.log(JSON.stringify(data.monsters.summonings));
-          for (var i = 0; i < data.monsters.summonings.length; i++) {
-            var summoning = data.monsters.summonings[i];
-            map.cells[summoning.move[0]].empty();
-            map.cells[summoning.move[1]].emplace({name: summoning.name});
-          }
-        }
-        if (data.monsters && data.monsters.removed) {
-          for (var i = 0; i < data.monsters.removed.length; i++) {
-            map.cells[data.monsters.removed[i]].empty();
-          }	
-        }
-        if (data.monsters && data.monsters.blessings) {
-          for (var i = 0; i < data.monsters.blessings.length; i++) {
-            map.cells[data.monsters.blessings[i]].bless();
-          }	
         }
         if (data.removed) {
           for (var i = 0; i < data.removed.length; i++) {
-            map.cells[data.removed[i]].update('tile empty', '[x]');
+            map.cells[data.removed[i]].empty();
           }
-        };
-        if (data.completed) {
+        }
+        if (data.complete) {
           $.mobile.changePage(data.url, {
             transition: 'pop',
             reloadPage: true,
@@ -297,15 +364,19 @@
       }, onPlacement);
     }
     map.activate = function activate() {
-      var usingMagic = map.isUsingMagic();
+      var parent = map.parent();
+      var isRemoving = map.isRemoving();
       for (var i = 0; i < map.cells.length; i++) {
-        if (usingMagic || map.cells[i].isEmpty()) map.cells[i].activate();
+        if (map.isTargetingMagic() || map.cells[i].isEmpty()) map.cells[i].activate();
       }
+      parent.append(map);
     }
     map.deactivate = function deactivate() {
+      var parent = map.parent();	
       for (var i = 0; i < map.cells.length; i++) {
         if (map.cells[i].active) map.cells[i].deactivate();
       }
+      parent.append(map);
     }
 
     map.activate();
@@ -343,7 +414,7 @@
    $('#map').Map({
       gridElemId: 'grid',
       nextTileElemId: 'next-tile',
-      abeyantTileElemId: 'abeyant-tile',
+      suspendedTileElemId: 'suspended-tile',
       scoreElemId: 'score',
       wisdomElemId: 'wisdom',
       movesElemId: 'moves'

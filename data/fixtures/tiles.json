@@ -9,6 +9,12 @@
     name: "Silver Key",
     group: "magic",
     level: 1,
+    weight: 0
+  },
+  {
+    name: "Mythos Tome",
+    group: "magic",
+    level: 1,
     weight: 20
   },
   {
@@ -31,35 +37,47 @@
     points: 50
   },
   {
+    name: "Parish Church",
+    group: "religion",
+    level: 4,
+    points: 75
+  },
+  {
     name: "Cathedral",
     group: "religion",
     level: 4
   },
   {
-    name: "Pasture",
+    name: "Farmland",
     group: "agriculture",
     level: 1,
     weight: 25,
     points: 5
   },
   {
-    name: "Farmstead",
+    name: "Orchard",
     group: "agriculture",
     level: 2,
     weight: 5,
     points: 10
   },
   {
-    name: "Plantation",
+    name: "Farmstead",
     group: "agriculture",
     level: 3,
     points: 25
   },
   {
-    name: "Estate",
+    name: "Plantation",
     group: "agriculture",
     level: 4,
     points: 50
+  },
+  {
+    name: "Estate",
+    group: "agriculture",
+    level: 5,
+    points: 75
   },
   {
     name: "Cottage",
@@ -88,6 +106,12 @@
     points: 50
   },
   {
+    name: "Georgian Manor",
+    group: "housing",
+    level: 5,
+    points: 75
+  },
+  {
     name: "Union Center",
     group: "fraternity",
     level: 1,
@@ -113,16 +137,22 @@
     points: 125
   },
   {
+    name: "Grand Lodge",
+    group: "fraternity",
+    level: 5,
+    points: 150
+  },
+  {
     name: "Cats of Ulthar",
     group: "monster",
     level: 1,
-    weight: 5
+    weight: 0
   },
   {
     name: "Cultist",
     group: "monster",
     level: 1,
-    weight: 10
+    weight: 0
   },
   {
     name: "Witch",

@@ -8,9 +8,10 @@ var matcher = require('./../lib/mechanics/matcher');
 var monsters = require('./../lib/mechanics/monsters');
 var rewarder = require('./../lib/mechanics/rewarder');
 var Turn = require('./turn').Model;
+var Match = require('./turn').Match;
 
 var struct = {
-  abeyantTileId: Schema.ObjectId,
+  suspendedTileId: Schema.ObjectId,
   active: {type: Boolean, default: true},	
   cells: [cell.Struct],
   moves: {type: Number, default: 0},
@@ -20,225 +21,281 @@ var struct = {
 }
 var schema = new Schema(struct);
 schema.virtual('size').get(function () {
-  return 7;
+  return 6;
 });
 schema.virtual('completed').get(function () {
-  for (var i = 0; i < this.cells.length; i++) {
-    if (this.cellAt(i).empty) return false;
-  }
-  return true;
+  var isComplete = true;
+  this.cells.forEach(function(cell) {
+    if (!cell.tileId) {
+      isComplete = false;
+      return;
+    }
+  });
+  return isComplete;
 });
 schema.virtual('nextTile').get(function () {
   return this.nextTileId ? tile.Model.lookups[this.nextTileId] : null;
 });
-schema.virtual('abeyantTile').get(function () {
-  return this.abeyantTileId ? tile.Model.lookups[this.abeyantTileId] : null;
+schema.virtual('suspendedTile').get(function () {
+  return this.suspendedTileId ? tile.Model.lookups[this.suspendedTileId] : null;
 });
-schema.methods.cellIndicesAt = function cellIndicesAt(index) {
-  var indices = {center: parseInt(index)};
-  indices.top = parseInt(indices.center - this.size);
-  indices.bottom = parseInt(indices.center + this.size);
-  indices.left = parseInt(indices.center - 1);
-  indices.right = parseInt(indices.center + 1);
-  indices.hasTop = indices.center >= this.size;
-  indices.hasBottom = indices.center < this.cells.length - this.size;
-  indices.hasLeft = indices.center % this.size !== 0;
-  indices.hasRight = indices.center % this.size !== this.size-1;
+schema.methods.neighborsFor = function neighborsFor(index) {
+  index = parseInt(index);
+  var neighbors = [];
 
-  return indices;
+  var top = parseInt(index - this.size);
+  var bottom = parseInt(index + this.size);
+  var left = parseInt(index - 1);
+  var right = parseInt(index + 1);  
+
+  if (index >= this.size) neighbors.push(top);
+  if (index < this.cells.length - this.size) neighbors.push(bottom);
+  if (index % this.size !== 0) neighbors.push(left);
+  if (index % this.size !== this.size-1) neighbors.push(right);
+
+  return neighbors;
+}
+schema.methods.emptyCells = function emptyCells() {
+  var cells = [];
+  for (var i = 0; i < this.cells.length; i++) {
+    if (!cell.tileId) cells.push(i);
+  };
+  return cells;
+}
+schema.methods.cellsByGroup = function cellsByGroup(name) {
+  var cells = [];
+  for (var i = 0; i < this.cells.length; i++) {
+    if (this.cells[i].tileId && this.tileAt(i).group === name) cells.push(i);
+  }
+  return cells;
+}
+schema.methods.cellsByName = function cellsByName(name) {
+  var cells = [];
+  for (var i = 0; i < this.cells.length; i++) {
+    if (this.cells[i].tileId && this.tileAt(i).name === name) cells.push(i);
+  }
+  return cells;
 }
 schema.methods.cellAt = function cellAt(index) {
-  return index < this.cells.length ? new cell.Model(this.cells[index]) : null;
+  if (index < this.cells.length) {
+    var data = this.cells[index];
+    var c = new cell.Model(data)
+    data.neighbors = data.neighbors || this.neighborsFor(index);
+    c.neighbors = data.neighbors;
+
+    return c;
+  }
 }
 schema.methods.tileAt = function tileAt(index) {
-  var cell = this.cellAt(index);
-  var tileId = cell ? cell.tileId : null;
-  return tileId ? tile.Model.lookups[tileId] : null;
+  if (index < this.cells.length) {
+    var tileId = this.cells[index].tileId;
+    return tileId ? tile.Model.lookups[tileId] : null;
+  }
 }
 schema.methods.dealTile = function dealTile() {
   this.nextTileId = dealer.deal(tile.Model.list)._id;
 }
 schema.methods.placeNextTile = function placeNextTile(index) {
-  var cell = this.cellAt(index);
-  if (cell && cell.empty) {	
+  var cellEmpty = this.cells[index].tileId ? false : true;
+  if (cellEmpty) {	
     this.cells[index].tileId = this.nextTileId;	
     return true;
   } else {
-    return false;	
+    return false;
   }
 }
-schema.methods.awardPoints = function awardPoints(matchedTiles) {
-  var points = rewarder.award(this, matchedTiles.matches);
-  this.score = this.score + points;
-  return points;
+schema.methods.awardPoints = function awardPoints(match) {
+  match.points = rewarder.points(this, match);
+  this.score = this.score + match.points;
 }
-schema.methods.awardWisdom = function awardWisdom(points) {
-  var wisdom = 0;
-  return wisdom;
+schema.methods.awardWisdom = function awardWisdom(match) {
+  return rewarder.wisdom(match.points);
 }
-schema.methods.match = function match(index, matchOnly) {
-  var matches = [index];
-  matcher.matchNeighbors(this, index, matches);	
-	
-  var matched = {matches: matches};	
-  if (matches.length >= 3) {
-    matched.points = this.awardPoints(matched);
-    matched.wisdom = this.awardWisdom(matched.points);
-    var upgrade = matchOnly ? {} : this.upgradeCells(index, matches);
+schema.methods.trap = function trap(index) {
+  var trappedTile = tile.Model.findByName("Magic Pentagram");
+  if (trappedTile) this.cells[index].tileId = trappedTile._id;
+  return trappedTile;
+}
+schema.methods.upgradeCells = function upgradeCells(match) {
+  var tileId = this.cells[match.index].tileId;
+  // var tileId = match.tile._id;
+  var upgradeTile = tile.Model.nextUpgrade(tileId);
+console.log("UPGRADE TILE FROM "+JSON.stringify(match.tile)+" TO "+JSON.stringify(upgradeTile))
+  if (!upgradeTile) return;
 
-console.log("MATCH and UPGRADE "+JSON.stringify(upgrade)+" "+JSON.stringify(matched))
-    if (upgrade){
-      matched.upgrade = upgrade.compressed;
-      var deepMatched = this.match(index, matchOnly);
+  var self = this;
+  match.cells.forEach(function(index) {
+	self.cells[index].tileId = null;
+  })
+  this.cells[match.index].tileId = upgradeTile._id;
+}
+schema.methods.upgradeTurnMatched = function upgradeTurnMatched(turn) {
+  var self = this;
+  turn.matched.forEach(function(match) {
+    self.awardPoints(match);
+    self.awardWisdom(match);
+    self.upgradeCells(match);
+  });		
+  turn.setRewardsFromMatched();
+}
+schema.methods.complete = function complete(turn) {
+  this.active = false;
+  if (turn) turn.complete = true
+}
+schema.methods.useMagic = function useMagic(turn, callback) {
+  var title = this.nextTile.name;
 
-      if (deepMatched.matches.length >= 3) {
-        matcher.mergeMatched(matched, deepMatched);
-      }
+  if (title === 'Elder Sign') {
+    this.useElderSign(turn);
+  } else if (title === 'Silver Key') {
+    this.useSilverKey(turn);
+  } else if (title === 'Mythos Tome') {
+    this.useMythosTome(turn);
+  }
+
+  if (this.completed) {
+    this.complete(turn);
+  } else {
+    var hasAssignedNextTile = turn.nextTile.name ? true : false;
+    if (!hasAssignedNextTile) {
+      this.dealTile();
+      turn.addNextTile(this.nextTile);
     }
   }
-console.log("RETURNING "+JSON.stringify(matched))
-  return matched;
-}
-schema.methods.upgradeCells = function upgradeCells(index, matches) {
-  var tileId = this.cells[index].tileId;
-  var upgrade = tile.Model.nextUpgrade(tileId);
-  if (!upgrade) return;
 
-  for (var i = 0; i < matches.length; i++) {
-	this.cells[matches[i]].tileId = null;
-  }
-  this.cells[index].tileId = upgrade._id;
-
-  return upgrade;
-}
-schema.methods.complete = function complete() {
-  this.active = false;
-}
-schema.methods.useMagic = function useMagic(index, callback) {
-  var removed = null;
-  var matched = null;
-
-  if (this.nextTile.name == 'Elder Sign') {
-    removed = this.useElderSign(index);
-  } else if (this.nextTile.name == 'Silver Key') {
-    matched = this.useSilverKey(index);
-  }
-
-console.log("using MAGIC *** "+JSON.stringify(removed)+ ' --- '+JSON.stringify(matched))
-
-  this.dealTile();
   this.markModified("cells");
   this.save(function (err, doc) {
-    callback(err, doc, matched, null, removed);
+    callback(err, turn);
   });
 }
-schema.methods.useElderSign = function useElderSign(index) {
-  var cell = this.cellAt(index);
-	
-  var removed = null;
-  if (cell && !cell.empty) {
-    this.cells[index].tileId = null;
-    removed = [index];
-  }
-  return removed;
+schema.methods.useMythosTome = function useMythosTome(turn) {
+  if (this.cells[turn.index].tileId) {
+    this.nextTileId = this.cells[turn.index].tileId;
+    this.cells[turn.index].tileId = null;
+    turn.removeCell(turn.index);
+    turn.addNextTile(this.nextTile);
+  }	
 }
-schema.methods.useSilverKey = function useSilverKey(index) {
+schema.methods.useElderSign = function useElderSign(turn) {
+  if (this.cells[turn.index].tileId) {
+    this.cells[turn.index].tileId = null;
+    turn.removeCell(turn.index);
+  }
+}
+schema.methods.useSilverKey = function useSilverKey(turn) {
   this.moves = this.moves + 1;
 
-console.log('key empty? '+this.cellAt(index).empty+ ' at '+index+' ')
-  if (!this.cellAt(index).empty) return;
+  var index = turn.index
+  var cell = this.cellAt(index);
+  var neighbors = cell.emplacedNeighbors(this.cells);
 
-  var indices = this.cellIndicesAt(index);
-  var neighbors = [];
-  if (indices.hasTop && !this.cellAt(indices.top).empty && this.tileAt(indices.top).landscape) neighbors.push(indices.top);
-  if (indices.hasLeft && !this.cellAt(indices.left).empty && this.tileAt(indices.left).landscape) neighbors.push(indices.left);
-  if (indices.hasBottom && !this.cellAt(indices.bottom).empty && this.tileAt(indices.bottom).landscape) neighbors.push(indices.bottom);
-  if (indices.hasRight && !this.cellAt(indices.right).empty && this.tileAt(indices.right).landscape) neighbors.push(indices.right);
-
-console.log('key neighbors '+JSON.stringify(neighbors))
-  if (neighbors.length === 0) return;
-
-  var wildcard = null;
-  var possibleMatches = [];
-  for (var i = 0; i < neighbors.length; i++) {	
-    this.cells[index].tileId = neighbors[i];
-	var matched = this.match(index, true);
-	possibleMatches.push(matched.matches || []);
-  }
-
-  var bestMatch = 0;
-  for (var i = 0; i < neighbors.length; i++) {
-    if (wildcard === null) {
-      wildcard = neighbors[i];
-    } else {
-      if (possibleMatches[i].length > possibleMatches[bestMatch].length ||
-         (possibleMatches[i].length === possibleMatches[bestMatch].length &&
-	      this.tileAt(neighbors[i]).points > this.tileAt(neighbors[bestMatch]).points)) {
-        bestMatch = i;
-	  }
+  function compareMatch(first, second) {
+    var firstMatchCount = 0;
+    var secondMatchCount = 0;
+    if (first) {
+      first.forEach(function(match) {
+        firstMatchCount = firstMatchCount + match.cells.length;
+      })
     }
-console.log('key matching wildcard '+wildcard+' best match is '+bestMatch)
-console.log('key matching match '+JSON.stringify(possibleMatches[i]))
-console.log('key matching points '+this.tileAt(neighbors[i]).points)
-
-// console.log('points '+this.tileAt(wildcard).points+' vs. '+this.tileAt(neighbors[i]).points + ' and size '+possibleMatches[i].length+ '>'+ possibleMatches[wildcard].length)
+    if (second) {
+      second.forEach(function(match) {
+        secondMatchCount = secondMatchCount + match.cells.length;
+      })
+    }
+	console.log('compareMatch '+firstMatchCount+' > '+secondMatchCount+' between first '+JSON.stringify(first)+' and second '+JSON.stringify(first))
+	
+	return firstMatchCount >= secondMatchCount ? first : second;
   }
-  wildcard = neighbors[bestMatch];
+  
+  var bestMatch = null;
+  var self = this;
+  neighbors.forEach(function(i) {	
+    var matches = [];
+    if (self.cells[i].tileId && !self.tileAt(i).monster) {
+      self.cells[index].tileId = self.cells[i].tileId;
+      matcher.matchRepeat(self, Match, matches, index);
+    }
 
-  this.cells[index].tileId = this.cells[wildcard].tileId;
-  var matched = this.match(index);
-  var tile = this.tileAt(index).compressed;
-  matched.placedTile = tile;
+    if (matches.length > 0) {
+      var finalMatchIndex = matches.length - 1;
+      var match = matches[finalMatchIndex];
+console.log('--- comparing key matches '+JSON.stringify(matches)+ ' ------ '+JSON.stringify(bestMatch))
+      bestMatch = compareMatch(matches, bestMatch);
+console.log('BEST TILE is '+JSON.stringify(bestMatch[0].tile))
+      self.cells[index].tileId = bestMatch[0].tile._id;
+    }
+  });
 
-console.log('key matched '+JSON.stringify(matched))
-  return matched;
+  if (bestMatch) {
+console.log('upgrading key best match '+JSON.stringify(bestMatch))	
+
+    bestMatch.reverse();
+    turn.matched = bestMatch;
+    this.upgradeTurnMatched(turn);
+	console.log('upgrading key best match '+JSON.stringify(turn))
+  } else {
+    var failedKeyTile = tile.Model.findByName("Magic Pentagram");
+    this.cells[index].tileId = failedKeyTile._id;
+    turn.addPlacedTile(failedKeyTile);
+  }
+
+  monsters.act(this, turn);
 }
-schema.methods.swapAbeyant = function swapAbeyant(callback) {
-  var abeyantId = this.abeyantTileId;
-  var nextId = this.nextTileId;
-  this.nextTileId = abeyantId;
-  this.abeyantTileId = nextId;
+schema.methods.matchCells = function matchCells(turn) {
+  matcher.matchRepeat(this, Match, turn.matched, turn.index);
 
-  if (!this.nextTileId) this.dealTile();
+  if (turn.matched.length) {
+    this.upgradeTurnMatched(turn);
+    console.log('rewards for turn '+JSON.stringify(turn))    
+  }
+}
+schema.methods.swapSuspended = function swapSuspended(callback) {
+  var suspendedId = this.suspendedTileId;
+  var nextId = this.nextTileId;
+  this.nextTileId = suspendedId;
+  this.suspendedTileId = nextId;
+
+  var swapSlotEmpty = !this.nextTileId;
+  if (swapSlotEmpty) this.dealTile();
 
   this.save(function (err, doc) {
     callback(err, doc);
   });
 }
-schema.methods.emplace = function emplace(index, callback) {
-  index = parseInt(index);
-  if (this.nextTile.magic) return this.useMagic(index, callback);
 
-	//   if (this.placeNextTile(index)) {
-	// var turn = new Turn();
-	// this.dealTile();
-	// turn.addNextTile(this.nextTile);
-	// 
-	//     this.markModified("cells");
-	//     this.save(function (err, doc) {
-	//       callback(err, doc, turn.serialize);
-	//     });	
-	//   } else {
-	//     callback("no cell available at "+index);
-	//   }
+schema.methods.useTile = function useTile(turn, callback) {
+  if (this.placeNextTile(turn.index)) {
+    if (this.tileAt(turn.index).landscape) {
+      this.matchCells(turn);
+    }
+    monsters.act(this, turn);
 
+	turn.addPlacedTile(this.nextTile);
+    if (this.completed) {
+      this.complete(turn);
+    } else {
+      this.dealTile();
+      turn.addNextTile(this.nextTile);
+    }
 
-  var cell = this.cellAt(index);
-  if (cell && cell.empty) {
-    this.cells[index].tileId = this.nextTileId;
-    var matched = this.match(index);
-    this.dealTile();
-    var movement = monsters.move(this, tile.Model.list, index);
-    	
-    this.moves = this.moves + 1;
-    if (this.completed) this.complete();
-  
     this.markModified("cells");
     this.save(function (err, doc) {
-      callback(err, doc, matched, movement);
-    });
+      callback(err, turn);
+    });	
   } else {
-    callback("no cell available at "+index);
+    callback("no cell available at "+turn.index);
+  };
+}
+
+schema.methods.emplace = function emplace(index, callback) {
+  var turn = new Turn({placed: {index: index}});
+console.log("")
+console.log("EMPLACE")
+console.log("")		
+  if (this.nextTile.magic) {
+    return this.useMagic(turn, callback);
+  } else {
+    return this.useTile(turn, callback);	
   }
 }
 
@@ -246,8 +303,8 @@ schema.statics.FindActive = function FindActive(playerId, callback) {
   var query = {playerId: playerId, active: true};
   return this.findOne(query, callback);
 }
-schema.statics.FindComplete = function FindComplete(playerId, callback) {
-  var query = {playerId: playerId, active: false};
+schema.statics.FindComplete = function FindComplete(mapId, callback) {
+  var query = {_id: mapId, active: false};
   return this.findOne(query, callback);
 }
 schema.statics.FindOrCreate = function FindOrCreate(playerId, callback) {

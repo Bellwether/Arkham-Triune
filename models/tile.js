@@ -16,8 +16,18 @@ schema.virtual('landscape').get(function () {
          this.group !== 'magic';	
 });
 schema.virtual('seedable').get(function () {
-  return parseInt(this.level) === 1 && landscape;
+  return parseInt(this.level) === 1 && this.landscape;
 });
+schema.virtual('warpingMonster').get(function () {
+  return this.monster && this.level > 2;
+});
+schema.virtual('trapableMonster').get(function () {
+  return this.monster && this.level < 3;	
+});
+schema.virtual('transportableMonster').get(function () {
+  return this.monster && this.level < 4 && this.name !== 'Cats of Ulthar';
+});
+
 schema.virtual('monster').get(function () {
   return this.group === 'monster';
 });
@@ -27,12 +37,7 @@ schema.virtual('magic').get(function () {
 schema.virtual('summoning').get(function () {
   return this.group === 'summoning';
 });
-
-schema.virtual('compressed').get(function () {
-  return {_id: this._id, name: this.name, group: this.group};
-});
 schema.methods.matchPoints = function matchPoints(matchCount) {
-	console.log("MATCHPOINTS FOR "+this.name+" x"+matchCount+", "+this.points+ ' points')
   matchCount = parseInt(matchCount);
   if (matchCount === 3) {
     return this.points * 3;
@@ -44,6 +49,10 @@ schema.methods.matchPoints = function matchPoints(matchCount) {
     return 0;	
   }
 }
+schema.virtual('compressed').get(function () {
+  return {_id: this._id, name: this.name, group: this.group};
+});
+
 schema.methods.nextUpgrade = function nextUpgrade() {
   return model.nextUpgrade(this._id);
 }
@@ -61,9 +70,15 @@ schema.statics.nextUpgrade = function nextUpgrade(tileId) {
     }
   }
 }
+schema.statics.findByName = function findByName(name) {
+  for (var i = 0; i < this.list.length; i++) {
+    if (this.list[i].name === name) return this.list[i];
+  }
+}
 
 var model = mongoose.model('Tile', schema);
 
+// cached lookup tables, by index and by _id key
 model.list = [];
 model.lookups = {};
 model.find({}, function(err, docs) {
@@ -74,7 +89,6 @@ model.find({}, function(err, docs) {
     }	
   }
 });
-
 
 module.exports = {
   Struct: struct,

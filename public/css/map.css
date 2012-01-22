@@ -35,6 +35,12 @@ width:100%;
 color:red;	
 }
 
+.Magic-Pentagram, 
+.Magic-Hexagram,
+.Magic-Heptagram {
+color:yellow;
+}
+
 .Cats-of {
 color:blue;
 }

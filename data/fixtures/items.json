@@ -5,10 +5,14 @@
   },
   {
     name: "Silver Key",
-    wisdom: 100
+    wisdom: 150
   },
   {
-    name: "Pasture",
+    name: "Mythos Tome",
+    wisdom: 200
+  },
+  {
+    name: "Farmland",
     wisdom: 15
   },
   {
@@ -16,7 +20,7 @@
     wisdom: 15
   },
   {
-    name: "Farmstead",
+    name: "Orchard",
     wisdom: 30
   },
   {

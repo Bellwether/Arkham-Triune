@@ -10,23 +10,23 @@ routes = {
     var playerId = req.authentication.playerId;
     var index = req.body.index;
 
-    function onMapUpdated(err, doc, matches, monsters, removed) {
-      if (doc && req.body.abeyant) {
-        var abeyant = doc.abeyantTile ? doc.abeyantTile.compressed : null;
+    function onMapUpdated(err, doc) {	
+      if (doc && req.body.suspended) {
+        var suspended = doc.suspendedTile ? doc.suspendedTile.compressed : null;
         var next = doc.nextTile ? doc.nextTile.compressed : null;
-        res.send({abeyant: abeyant, next: next});
-      } else if (doc && doc.completed) {
-        res.send({completed: doc.completed, url: '/maps/'+doc._id});
+        res.send({suspended: suspended, next: next});
+      } else if (doc && doc.complete) {
+        doc.url = '/maps/'+doc._id; // show map results on completion
+        res.send(doc);
       } else if (doc) {
-        var tile = doc.nextTile.compressed;
-        res.send({tile: tile, matched: matches, monsters: monsters, removed: removed});
+        res.send(doc.serialize);
       } else {
         res.send({err: err || "Cannot update map"});
       }      
     }
     function onMapFound(err, doc) {
-      if (doc && req.body.abeyant) {
-        doc.swapAbeyant(onMapUpdated);
+      if (doc && req.body.suspended) {
+        doc.swapSuspended(onMapUpdated);
       } else if (doc) {	
         doc.emplace(index, onMapUpdated);
       } else {
@@ -37,7 +37,7 @@ routes = {
   },
 
   show: function(req, res) {
-    var playerId = req.authentication.playerId;	
+    var mapId = req.params.id;
 
     function onMapFound(err, doc) {
       if (doc) {
@@ -46,7 +46,7 @@ routes = {
         res.redirect('/')
       }	
 	}
-    map.Model.FindComplete(playerId, onMapFound);
+    map.Model.FindComplete(mapId, onMapFound);
   },
 
   destroy: function(req, res) {
