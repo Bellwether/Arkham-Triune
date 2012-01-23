@@ -28,7 +28,7 @@ Match.methods.hasCell = function hasCell(index) {
 }
 
 var Summoning = new Schema({
-  move: [Path],
+  move: Path,
   tile: Tile
 });
 
@@ -40,11 +40,12 @@ var struct = {
   matched: [Match],
   trapped: {
     traps: [Number],
-    tile: Tile
+    tile: Tile,
+    matched: [Match]
   },
   moved: {
     moves: [Path],
-    summonings: [Summoning]
+    transports: [Summoning]
   },
   enchanted: {
     blessed: [Number],
@@ -58,17 +59,25 @@ var struct = {
 }
 var schema = new Schema(struct);
 
-schema.virtual('lastMatch').get(function() {
-  return this.matched.length > 0 ? this.matched[this.matched.length - 1] : null;
-});
 schema.virtual('serialize').get(function() {
   var json = {placed: {index: this.placed.index}}
   if (this.placed.tile.name) json.placed.tile = this.placed.tile;
   if (this.matched.length) json.matched = this.matched;
-  if (this.trapped.traps.length > 0) json.trapped = this.trapped;
+  if (this.trapped.traps.length > 0) {
+    json.trapped = {traps: this.trapped.traps, tile: this.trapped.tile};
+  }
+  if (this.trapped.matched.length > 0) {
+    json.trapped = json.trapped || {};
+    json.trapped.matched = this.trapped.matched;
+  }
   if (this.moved.moves.length) {
     json.moved = {moves: []};
     for (var i = 0; i < this.moved.moves.length; i++) json.moved.moves.push(this.moved.moves[i]); 
+  }
+  if (this.moved.transports.length) {
+    json.moved = json.moved || {};
+    json.moved.transports = [];
+    for (var i = 0; i < this.moved.transports.length; i++) json.moved.transports.push(this.moved.transports[i]);
   }
   if (this.removed.length > 0) json.removed = this.removed;
   if (this.complete) json.complete = this.complete;
@@ -89,7 +98,6 @@ schema.methods.setRewardsFromMatched = function setRewardsFromMatched() {
   for (var i = 0; i < this.matched.length; i++) {
     this.points = this.points + this.matched[i].points;
     this.wisdom = this.wisdom + this.matched[i].wisdom;
-console.log('points/wisdom '+this.points+' '+this.wisdom +' matched was '+JSON.stringify(this.matched[i]))
   }
 }
 schema.methods.removeCell = function removeCell(index) {
@@ -101,9 +109,17 @@ schema.methods.addMatch = function addMatch(match) {
 schema.methods.addMove = function addMove(path) {
   this.moved.moves.push({path: path});
 }
+schema.methods.addTransport = function addTransport(path, tile) {
+  var transport = {move: {path: path}};
+  if (tile) transport.tile = {_id: tile._id, name: tile.name};
+  this.moved.transports.push(transport);
+}
 schema.methods.addTrap = function addTrap(index, tile) {
   this.trapped.traps.push(index);
   if (tile) this.trapped.tile = {name: tile.name};
+}
+schema.methods.addTrapMatch = function addTrapMatch(match) {
+  this.trapped.matched.push(match);
 }
 schema.methods.addPlacedTile = function addPlacedTile(tile) {
   if (tile) this.placed.tile.name = tile.name;

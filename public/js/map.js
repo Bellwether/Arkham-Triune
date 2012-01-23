@@ -336,11 +336,30 @@
               map.moveCell(path[0], path[1]);
             }
           }
+          if (data.moved.transports) {
+            for (var i = 0; i < data.moved.transports.length; i++) {
+              var path = data.moved.transports[i].move.path;
+              var monsterUpgrade = data.moved.transports[i].tile;
+              if (monsterUpgrade) map.cells[path[0]].emplace(monsterUpgrade);
+console.log("move cell "+JSON.stringify(path))
+              map.moveCell(path[0], path[1]);
+            }	
+          }
         }
         if (data.trapped) {
           for (var i = 0; i < data.trapped.traps.length; i++) {
             map.cells[data.trapped.traps[i]].emplace(data.trapped.tile);
           }
+
+          if (data.trapped.matched) {
+            for (var i = 0; i < data.trapped.matched.length; i++) {
+              for (var j = 0; j < data.trapped.matched[i].cells.length; j++) {	
+                map.cells[data.trapped.matched[i].cells[j]].empty();
+              };
+              map.cells[data.trapped.matched[i].index].emplace(data.trapped.matched[i].tile);
+            }
+          }
+
         }
         if (data.removed) {
           for (var i = 0; i < data.removed.length; i++) {

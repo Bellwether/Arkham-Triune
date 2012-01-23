@@ -33,6 +33,9 @@ schema.virtual('completed').get(function () {
   });
   return isComplete;
 });
+schema.virtual('matcher').get(function () {
+  return matcher;
+});
 schema.virtual('nextTile').get(function () {
   return this.nextTileId ? tile.Model.lookups[this.nextTileId] : null;
 });
@@ -58,7 +61,7 @@ schema.methods.neighborsFor = function neighborsFor(index) {
 schema.methods.emptyCells = function emptyCells() {
   var cells = [];
   for (var i = 0; i < this.cells.length; i++) {
-    if (!cell.tileId) cells.push(i);
+    if (!this.cells[i].tileId) cells.push(i);
   };
   return cells;
 }
@@ -118,7 +121,6 @@ schema.methods.trap = function trap(index) {
 }
 schema.methods.upgradeCells = function upgradeCells(match) {
   var tileId = this.cells[match.index].tileId;
-  // var tileId = match.tile._id;
   var upgradeTile = tile.Model.nextUpgrade(tileId);
 console.log("UPGRADE TILE FROM "+JSON.stringify(match.tile)+" TO "+JSON.stringify(upgradeTile))
   if (!upgradeTile) return;
@@ -129,12 +131,15 @@ console.log("UPGRADE TILE FROM "+JSON.stringify(match.tile)+" TO "+JSON.stringif
   })
   this.cells[match.index].tileId = upgradeTile._id;
 }
+schema.methods.upgradeTurnMatch = function upgradeTurnMatch(match) {
+  this.awardPoints(match);
+  this.awardWisdom(match);
+  this.upgradeCells(match);
+}
 schema.methods.upgradeTurnMatched = function upgradeTurnMatched(turn) {
   var self = this;
   turn.matched.forEach(function(match) {
-    self.awardPoints(match);
-    self.awardWisdom(match);
-    self.upgradeCells(match);
+    self.upgradeTurnMatch(match);
   });		
   turn.setRewardsFromMatched();
 }
@@ -188,39 +193,6 @@ schema.methods.useSilverKey = function useSilverKey(turn) {
   var index = turn.index
   var cell = this.cellAt(index);
   var neighbors = cell.emplacedNeighbors(this.cells);
-
-  function compareMatch(first, second) {
-    var firstMatchCount = 0;
-    var secondMatchCount = 0;
-    if (first) {
-      first.forEach(function(match) {
-        firstMatchCount = firstMatchCount + match.cells.length;
-      })
-    }
-    if (second) {
-      second.forEach(function(match) {
-        secondMatchCount = secondMatchCount + match.cells.length;
-      })
-    }
-	console.log('compareMatch '+firstMatchCount+' > '+secondMatchCount+' between first '+JSON.stringify(first)+' and second '+JSON.stringify(first))
-	
-    var compareByPoints = firstMatchCount > 0 && firstMatchCount === secondMatchCount;
-	if (compareByPoints) {
-      var firstMatchPoints = 0;
-      var secondMatchPoints = 0;
-
-      first.forEach(function(match) {		
-        firstMatchPoints = firstMatchPoints + tile.Model.lookups[match.tile._id].points;
-      });
-      second.forEach(function(match) {		
-        secondMatchPoints = secondMatchPoints + tile.Model.lookups[match.tile._id].points;
-      });
-
-      return firstMatchPoints >= secondMatchPoints ? first : second;
-	} else {
-	  return firstMatchCount >= secondMatchCount ? first : second;
-    }
-  }
   
   var bestMatch = null;
   var bestNeighborTileId = null;
@@ -229,21 +201,17 @@ schema.methods.useSilverKey = function useSilverKey(turn) {
     var matches = [];
     if (self.cells[i].tileId && !self.tileAt(i).monster) {
       self.cells[index].tileId = self.cells[i].tileId;
-      matcher.matchRepeat(self, Match, matches, index);
+      self.matchRepeat(matches, index);
     }
 
     if (matches.length > 0) {
-console.log('--- comparing key matches '+JSON.stringify(matches)+ ' ------ '+JSON.stringify(bestMatch))
-      bestMatch = compareMatch(matches, bestMatch);
+      bestMatch = matcher.compareMatches(matches, bestMatch, tile.Model.lookups);
 	
 console.log('BEST TILE is '+JSON.stringify(bestMatch[0].tile)+' FROM '+JSON.stringify(self.tileAt(bestMatch[0].cells[0]) ))
     }
   });
 
   if (bestMatch) {
-    // bestMatch.reverse();
-console.log('upgrading key best match ::::::::::::: '+JSON.stringify(bestMatch))	
-
     var aNeighborIndex = bestMatch[0].cells[0];
     var bestMatchTileId = self.tileAt(aNeighborIndex)._id;
     self.cells[index].tileId = bestMatchTileId;
@@ -261,12 +229,14 @@ console.log('+++++  UPGRADING TO BEST TILE ('+bestMatchTileId+') '+JSON.stringif
 
   monsters.act(this, turn);
 }
+schema.methods.matchRepeat = function matchRepeat(matches, index) {
+  matcher.matchRepeat(this, Match, matches, index);
+}
 schema.methods.matchCells = function matchCells(turn) {
-  matcher.matchRepeat(this, Match, turn.matched, turn.index);
+  this.matchRepeat(turn.matched, turn.index);
 
   if (turn.matched.length) {
     this.upgradeTurnMatched(turn);
-    console.log('rewards for turn '+JSON.stringify(turn))    
   }
 }
 schema.methods.swapSuspended = function swapSuspended(callback) {
@@ -309,9 +279,6 @@ schema.methods.useTile = function useTile(turn, callback) {
 
 schema.methods.emplace = function emplace(index, callback) {
   var turn = new Turn({placed: {index: index}});
-console.log("")
-console.log("EMPLACE")
-console.log("")		
   if (this.nextTile.magic) {
     return this.useMagic(turn, callback);
   } else {

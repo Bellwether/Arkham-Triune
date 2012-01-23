@@ -3,25 +3,25 @@
     name: "Elder Sign",
     group: "magic",
     level: 1,
-    weight: 5
+    weight: 10
   },
   {
     name: "Silver Key",
     group: "magic",
     level: 1,
-    weight: 20
+    weight: 5
   },
   {
     name: "Mythos Tome",
     group: "magic",
     level: 1,
-    weight: 10
+    weight: 1
   },
   {
     name: "Mission",
     group: "religion",
     level: 1,
-    weight: 5,
+    weight: 10,
     points: 10
   },
   {
@@ -45,7 +45,8 @@
   {
     name: "Cathedral",
     group: "religion",
-    level: 4
+    level: 5
+    points: 100
   },
   {
     name: "Farmland",
@@ -83,7 +84,7 @@
     name: "Cottage",
     group: "housing",
     level: 1,
-    weight: 20,
+    weight: 25,
     points: 5
   },
   {
@@ -115,7 +116,7 @@
     name: "Union Center",
     group: "fraternity",
     level: 1,
-    weight: 1,
+    weight: 10,
     points: 15
   },
   {
@@ -152,7 +153,7 @@
     name: "Cultist",
     group: "monster",
     level: 1,
-    weight: 0
+    weight: 30
   },
   {
     name: "Witch",

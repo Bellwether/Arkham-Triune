@@ -9,14 +9,16 @@ routes = {
   update: function(req, res) {
     var playerId = req.authentication.playerId;
     var index = req.body.index;
+    var mapId = null
 
-    function onMapUpdated(err, doc) {	
+    function onMapUpdated(err, doc) {
       if (doc && req.body.suspended) {
         var suspended = doc.suspendedTile ? doc.suspendedTile.compressed : null;
         var next = doc.nextTile ? doc.nextTile.compressed : null;
         res.send({suspended: suspended, next: next});
       } else if (doc && doc.complete) {
-        doc.url = '/maps/'+doc._id; // show map results on completion
+        var doc = doc.serialize;
+        doc.url = '/maps/'+mapId; // show map results on completion
         res.send(doc);
       } else if (doc) {
         res.send(doc.serialize);
@@ -25,6 +27,7 @@ routes = {
       }      
     }
     function onMapFound(err, doc) {
+      mapId = doc ? doc._id : null;
       if (doc && req.body.suspended) {
         doc.swapSuspended(onMapUpdated);
       } else if (doc) {	
