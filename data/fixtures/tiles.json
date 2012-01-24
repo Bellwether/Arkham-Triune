@@ -147,7 +147,7 @@
     name: "Cats of Ulthar",
     group: "monster",
     level: 1,
-    weight: 0
+    weight: 15
   },
   {
     name: "Cultist",

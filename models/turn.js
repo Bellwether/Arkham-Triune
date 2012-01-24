@@ -27,7 +27,7 @@ Match.methods.hasCell = function hasCell(index) {
   return false;
 }
 
-var Summoning = new Schema({
+var Transport = new Schema({
   move: Path,
   tile: Tile
 });
@@ -45,11 +45,15 @@ var struct = {
   },
   moved: {
     moves: [Path],
-    transports: [Summoning]
+    transports: [Transport]
   },
   enchanted: {
     blessed: [Number],
     cursed: [Number]
+  },
+  summoned: {
+    tile: Tile,
+    cells: [Number]
   },
   removed: [Number],
   points: Number,
@@ -80,10 +84,13 @@ schema.virtual('serialize').get(function() {
     for (var i = 0; i < this.moved.transports.length; i++) json.moved.transports.push(this.moved.transports[i]);
   }
   if (this.removed.length > 0) json.removed = this.removed;
+  if (this.summoned.length > 0) json.summoned = this.summoned;
   if (this.complete) json.complete = this.complete;
   if (this.points) json.points = this.points;
   if (this.wisdom) json.wisdom = this.wisdom;
-  if (this.enchanted.blessed.length + this.enchanted.cursed.length > 0) json.enchanted = this.enchanted;
+  if (this.enchanted.blessed.length + this.enchanted.cursed.length > 0) json.enchanted = {};
+  if (this.enchanted.blessed.length > 0) json.enchanted.blessed = this.enchanted.blessed;
+  if (this.enchanted.cursed.length > 0) json.enchanted.cursed = this.enchanted.cursed;
 
   if (this.nextTile) json.nextTile = this.nextTile;
   return json;
@@ -100,6 +107,13 @@ schema.methods.setRewardsFromMatched = function setRewardsFromMatched() {
     this.wisdom = this.wisdom + this.matched[i].wisdom;
   }
 }
+schema.methods.setRewardsFromTrapped = function setRewardsFromTrapped() {
+  for (var i = 0; i < this.trapped.matched.length; i++) {
+    this.points = this.points + this.trapped.matched[i].points;
+    this.wisdom = this.wisdom + this.trapped.matched[i].wisdom;
+  }
+}
+
 schema.methods.removeCell = function removeCell(index) {
   this.removed.push(parseInt(index));
 }
@@ -117,6 +131,10 @@ schema.methods.addTransport = function addTransport(path, tile) {
 schema.methods.addTrap = function addTrap(index, tile) {
   this.trapped.traps.push(index);
   if (tile) this.trapped.tile = {name: tile.name};
+}
+schema.methods.addSummoning = function addSummoning(index, tile) {
+  this.summoned.cells.push(index);
+  if (tile) this.summoned.tile = {name: tile.name};
 }
 schema.methods.addTrapMatch = function addTrapMatch(match) {
   this.trapped.matched.push(match);

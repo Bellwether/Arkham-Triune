@@ -165,6 +165,102 @@
     this.originalText = text;
   }
 
+  $.Turn = function(map, data, cell) {
+    this.map = map;
+    this.cell = cell;
+    this.fx = [];
+    this.data = data;
+    return this;
+  }
+  $.Turn.prototype.queueFx = function queueFx(title, delay) {
+    var functor = this[title];
+    if (functor && typeof functor === 'function') {
+      this.fx.push({callback: functor, delay: delay});
+    };
+  }
+  $.Turn.prototype.run = function run(callback) {
+    this.runFx(0, callback);
+  }
+  $.Turn.prototype.runFx = function runFx(index, callback) {
+    if (index >= this.fx.length) {
+      callback();
+    } else {
+      this.fx[index].callback.call(this);
+
+      var self = this;
+      setTimeout(function() { 
+        self.runFx(index+1, callback);
+      }, this.fx[index].delay);
+    }
+  }
+  $.Turn.prototype.fxPlaceTile = function fxPlaceTile() {
+    var tile = this.data.placed.tile;
+    if (tile) {
+      this.map.moves.text(1);	
+      this.cell.emplace(tile);
+    } else {		
+      this.cell.empty();
+    }
+  }
+  $.Turn.prototype.fxScore = function fxScore() {	
+    if (this.data.points) this.map.score.text(this.data.points);
+    if (this.data.wisdom) this.map.wisdom.text(this.data.wisdom);
+  }
+  $.Turn.prototype.fxMatchPlacement = function fxMatchPlacement() {	
+    for (var i = 0; i < this.data.matched.length; i++) {
+      var match = this.data.matched[i];
+      for (var j = 0; j < match.cells.length; j++) {	
+        this.map.cells[match.cells[j]].empty();
+      };
+      this.map.cells[match.index].emplace(match.tile);
+    }
+  }
+  $.Turn.prototype.fxMonstersMoved = function fxMonstersMoved() {	
+    for (var i = 0; i < this.data.moved.moves.length; i++) {
+      var path = this.data.moved.moves[i].path;
+      this.map.moveCell(path[0], path[1]);
+    }
+  }
+  $.Turn.prototype.fxMonstersTransported = function fxMonstersTransported() {	
+    for (var i = 0; i < this.data.moved.transports.length; i++) {
+      var path = this.data.moved.transports[i].move.path;
+      var monsterUpgrade = this.data.moved.transports[i].tile;
+      if (monsterUpgrade) this.map.cells[path[0]].emplace(monsterUpgrade);
+      this.map.moveCell(path[0], path[1]);
+    }
+  }
+  $.Turn.prototype.fxMonstersCursed = function fxMonstersCursed() {	
+    for (var i = 0; i < this.data.enchanted.cursed.length; i++) {
+      this.map.cells[ this.data.enchanted.cursed[i] ].tile.addClass('cursed');
+    }	
+  }
+  $.Turn.prototype.fxMonstersBlessed = function fxMonstersBlessed() {	
+    for (var i = 0; i < this.data.enchanted.blessed.length; i++) {
+      this.map.cells[ this.data.enchanted.blessed[i] ].tile.removeClass('cursed');
+    }
+  }
+  $.Turn.prototype.fxMonstersTrapped = function fxMonstersTrapped() {	
+    var tile = this.data.trapped.tile;
+    for (var i = 0; i < this.data.trapped.traps.length; i++) {
+      this.map.cells[ this.data.trapped.traps[i] ].emplace(tile);
+    }
+
+    if (this.data.trapped.matched) {
+      for (var i = 0; i < this.data.trapped.matched.length; i++) {
+        var match = this.data.trapped.matched[i];
+        for (var j = 0; j < match.cells.length; j++) {	
+          this.map.cells[ match.cells[j]].empty();
+        };
+        this.map.cells[match.index].emplace(match.tile);
+      }
+    }
+  }
+  $.Turn.prototype.fxTilesRemoved = function fxTilesRemoved() {	
+    for (var i = 0; i < this.data.removed.length; i++) {
+      this.map.cells[this.data.removed[i]].empty();
+    }	
+  }
+
   $.fn.Map = function(options) {
     options = options || {};
     var map = $(this);
@@ -213,7 +309,7 @@
       mover.update(targetClass, targetText);
       target.update(moverClass, moverText);
     }	
-    map.isRemoving = function isRemoving() {	
+    map.isRemoving = function isRemoving() {
       var title = map.nextTile.text();
       return title.indexOf('Elder Sign') > -1;	
     }
@@ -235,146 +331,34 @@
       function onPlacement(data, textStatus) {
         console.log(JSON.stringify(textStatus)+' '+JSON.stringify(data))
 
-        // if (data.tile) { // general success
-        //   if (map.isUsingMagic()) {
-        //     cell.empty();
-        //   } else { 
-        //     cell.emplace({name: map.nextTile.text()}); // place tile
-        //   }
-        //   map.nextTile.text(data.tile.name);
-        //   map.moves.text(1);
-        // }
-        // if (data.matched) {
-        //   map.match(cell.index, data.matched);
-        // 
-        //   if (data.matched.points) {
-        //     map.score.text(data.matched.points);
-        //   }
-        // }
-        // if (data.matched && data.matched.placedTile) {
-        //   cell.emplace(data.matched.placedTile);
-        // }
-        // if (data.monsters) {
-        //   if (data.monsters.trapped) {
-        //     var monsters = data.monsters.trapped.matches;
-        //     for (var i = 0; i < monsters.length; i++) {
-        //       var tile = monsters[i].tile;
-        //       map.cells[monsters[i].index].update(tile.name.replace(' ','-'), tile.name);
-        //     }
-        //   }
-        //   if (data.monsters.upgraded) {
-        //     map.match(data.monsters.upgraded.index, data.monsters.upgraded);
-        //   }
-        // }
-        // if (data.monsters && data.monsters.moves) {
-        //   for (var i = 0; i < data.monsters.moves.length; i++) {
-        //     var fromToTuple = data.monsters.moves[i];
-        //     var mover = map.cells[fromToTuple[0]];
-        //     var target = map.cells[fromToTuple[1]];
-        //     var moverClass = mover.tile.attr('class');
-        //     var targetClass = target.tile.attr('class');
-        //     var moverText = mover.tile.html();
-        //     var targetText = target.tile.html();
-        // 
-        //     mover.update(targetClass, targetText);
-        //     target.update(moverClass, moverText);
-        //   }
-        // }
-        // if (data.monsters && data.monsters.summonings) {
-        //   console.log(JSON.stringify(data.monsters.summonings));
-        //   for (var i = 0; i < data.monsters.summonings.length; i++) {
-        //     var summoning = data.monsters.summonings[i];
-        //     map.cells[summoning.move[0]].empty();
-        //     map.cells[summoning.move[1]].emplace({name: summoning.name});
-        //   }
-        // }
-        // if (data.monsters && data.monsters.removed) {
-        //   for (var i = 0; i < data.monsters.removed.length; i++) {
-        //     map.cells[data.monsters.removed[i]].empty();
-        //   }	
-        // }
-        // if (data.monsters && data.monsters.blessings) {
-        //   for (var i = 0; i < data.monsters.blessings.length; i++) {
-        //     map.cells[data.monsters.blessings[i]].bless();
-        //   }	
-        // }
-        // if (data.removed) {
-        //   for (var i = 0; i < data.removed.length; i++) {
-        //     map.cells[data.removed[i]].update('tile empty', '[x]');
-        //   }
-        // };
+        var turn = new $.Turn(map, data, cell);
+
         if (data.nextTile) {
           map.nextTile.text(data.nextTile.name);
         }
-        if (data.placed) {
-          var tile = data.placed.tile;
-          if (tile) {
-            map.moves.text(1);	
-            cell.emplace(tile);
-          } else {		
-            cell.empty();
-          }
-        }
-        if (data.matched) {
-          for (var i = 0; i < data.matched.length; i++) {
-            for (var j = 0; j < data.matched[i].cells.length; j++) {	
-              map.cells[data.matched[i].cells[j]].empty();
-            };
-            map.cells[data.matched[i].index].emplace(data.matched[i].tile);
-          }
-        }
-        if (data.points) {
-          map.score.text(data.points);
-        }
-        if (data.wisdom) {
-          map.wisdom.text(data.wisdom);
-        }
-        if (data.moved) {
-          if (data.moved.moves) {
-            for (var i = 0; i < data.moved.moves.length; i++) {
-              var path = data.moved.moves[i].path;
-              map.moveCell(path[0], path[1]);
-            }
-          }
-          if (data.moved.transports) {
-            for (var i = 0; i < data.moved.transports.length; i++) {
-              var path = data.moved.transports[i].move.path;
-              var monsterUpgrade = data.moved.transports[i].tile;
-              if (monsterUpgrade) map.cells[path[0]].emplace(monsterUpgrade);
-console.log("move cell "+JSON.stringify(path))
-              map.moveCell(path[0], path[1]);
-            }	
-          }
-        }
-        if (data.trapped) {
-          for (var i = 0; i < data.trapped.traps.length; i++) {
-            map.cells[data.trapped.traps[i]].emplace(data.trapped.tile);
-          }
 
-          if (data.trapped.matched) {
-            for (var i = 0; i < data.trapped.matched.length; i++) {
-              for (var j = 0; j < data.trapped.matched[i].cells.length; j++) {	
-                map.cells[data.trapped.matched[i].cells[j]].empty();
-              };
-              map.cells[data.trapped.matched[i].index].emplace(data.trapped.matched[i].tile);
-            }
-          }
+        if (data.placed) turn.queueFx('fxPlaceTile', 0);
+        if (data.matched) turn.queueFx('fxMatchPlacement', 200);
+        if (data.placed) turn.queueFx('fxScore', 0);
+        if (data.moved && data.moved.moves) turn.queueFx('fxMonstersMoved', 400);
+        if (data.moved && data.moved.transports) turn.queueFx('fxMonstersTransported', 250);
+        if (data.trapped) turn.queueFx('fxMonstersTrapped', 250);
+        if (data.enchanted && data.enchanted.cursed) turn.queueFx('fxMonstersCursed', 100);
+        if (data.enchanted && data.enchanted.blessed) turn.queueFx('fxMonstersBlessed', 0);
+        if (data.removed) turn.queueFx('fxTilesRemoved', 0);
 
-        }
-        if (data.removed) {
-          for (var i = 0; i < data.removed.length; i++) {
-            map.cells[data.removed[i]].empty();
+        turn.run(function() {
+          if (data.complete) {
+            $.mobile.changePage(data.url, {
+              transition: 'pop',
+              reloadPage: true,
+              role: 'dialog'
+            });
+            return;
+          } else {
+            map.activate();
           }
-        }
-        if (data.complete) {
-          $.mobile.changePage(data.url, {
-            transition: 'pop',
-            reloadPage: true,
-            role: 'dialog'
-          });
-          return;
-        }
-        map.activate();
+        })
       }
 
       $.sendRequest({

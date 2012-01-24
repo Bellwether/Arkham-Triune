@@ -44,7 +44,7 @@ routes = {
 
     function onMapFound(err, doc) {
       if (doc) {
-        res.render('map/show', {map: doc, layout: 'app/layouts/dialog'});
+        res.render('map/show', {map: doc, layout: 'app/layouts/dialog', title: 'Arkham, MA'});
       } else {
         res.redirect('/')
       }	

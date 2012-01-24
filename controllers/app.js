@@ -1,5 +1,6 @@
 var log = require('util').log;
-var map = require('./../models/map');
+var Map = require('./../models/map').Model;
+var Player = require('./../models/player').Model;
 
 var AppController = function(req, res, next) {
   this.request = req;
@@ -34,20 +35,17 @@ var AppController = function(req, res, next) {
   function renderAppIndex(req, res) {
     var playerId = req.authentication.playerId;
 
-    function onMapCreated(err, doc) {
-      res.render('app/index');
-    }
-    function onMapFound(err, doc) {
+    function onMap(err, doc) {
       if (err) {
         res.render('app/index');
       } else if (doc) {
-        res.render('app/index', {map: doc});
-      } else {
-        map.Model.Create(playerId, onMapCreated);
+        Player.Find(playerId, function(err, player) {	
+          res.render('app/index', {map: doc, player: player});
+        });
       }
     }
 
-    map.Model.FindOrCreate(playerId, onMapFound);
+    Map.FindOrCreate(playerId, onMap);
   }
 
   this.AppRoutes = {

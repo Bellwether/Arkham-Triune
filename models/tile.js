@@ -22,19 +22,24 @@ schema.virtual('matchable').get(function () {
 schema.virtual('seedable').get(function () {
   return parseInt(this.level) === 1 && this.landscape;
 });
+schema.virtual('helpingMonster').get(function () {
+  return this.name === 'Cats of Ulthar';
+});
 schema.virtual('cursingMonster').get(function () {
-  return this.monster && this.level > 1 && this.name !== 'Cats of Ulthar';
+  return this.monster && this.level > 1 && !this.helpingMonster;
 });
 schema.virtual('warpingMonster').get(function () {
-  return this.monster && this.level > 2 && this.name !== 'Cats of Ulthar';
+  return this.monster && this.level > 2 && !this.helpingMonster;
 });
 schema.virtual('trapableMonster').get(function () {
-  return this.monster && this.level < 3;	
+  return !this.warpingMonster && this.level < 3;	
 });
 schema.virtual('transportableMonster').get(function () {
-  return this.monster && !this.level < 4 && this.name !== 'Cats of Ulthar';
+  return this.monster && !this.level < 4 && !this.helpingMonster;
 });
-
+schema.virtual('summoningMonster').get(function () {
+  return this.monster && !this.level < 5 && !this.helpingMonster;
+});
 schema.virtual('monster').get(function () {
   return this.group === 'monster';
 });
