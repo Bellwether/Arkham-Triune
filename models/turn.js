@@ -56,6 +56,7 @@ var struct = {
     cells: [Number]
   },
   removed: [Number],
+  canabalized: [Number],
   points: Number,
   wisdom: Number,
   nextTile: Tile,
@@ -67,6 +68,7 @@ schema.virtual('serialize').get(function() {
   var json = {placed: {index: this.placed.index}}
   if (this.placed.tile.name) json.placed.tile = this.placed.tile;
   if (this.matched.length) json.matched = this.matched;
+  if (this.canabalized.length) json.canabalized = this.canabalized;
   if (this.trapped.traps.length > 0) {
     json.trapped = {traps: this.trapped.traps, tile: this.trapped.tile};
   }
@@ -84,7 +86,7 @@ schema.virtual('serialize').get(function() {
     for (var i = 0; i < this.moved.transports.length; i++) json.moved.transports.push(this.moved.transports[i]);
   }
   if (this.removed.length > 0) json.removed = this.removed;
-  if (this.summoned.length > 0) json.summoned = this.summoned;
+  if (this.summoned.cells.length > 0) json.summoned = this.summoned;
   if (this.complete) json.complete = this.complete;
   if (this.points) json.points = this.points;
   if (this.wisdom) json.wisdom = this.wisdom;
@@ -114,6 +116,10 @@ schema.methods.setRewardsFromTrapped = function setRewardsFromTrapped() {
   }
 }
 
+
+schema.methods.addCanabalized = function addCanabalized(index) {
+  if (index && this.canabalized.indexOf(index) < 0) this.canabalized.push(index);
+}
 schema.methods.removeCell = function removeCell(index) {
   this.removed.push(parseInt(index));
 }

@@ -148,8 +148,7 @@
     this.originalText = null;
   }
   $.MapCell.prototype.emplace = function emplace(tile) {	
-    this.tile.removeClass('empty');
-    this.tile.addClass(tile.name.replace(/\s/,'-'));
+    this.tile.attr('class', 'tile '+tile.name.replace(/\s/,'-'));
     this.tile.html(tile.name);
     this.originalText = tile.name;
   }
@@ -239,6 +238,12 @@
       this.map.cells[ this.data.enchanted.blessed[i] ].tile.removeClass('cursed');
     }
   }
+  $.Turn.prototype.fxMonstersSummoned = function fxMonstersSummoned() {	
+    var tile = this.data.summoned.tile;
+    for (var i = 0; i < this.data.summoned.cells.length; i++) {
+      this.map.cells[ this.data.summoned.cells[i] ].emplace(tile);
+    }
+  }
   $.Turn.prototype.fxMonstersTrapped = function fxMonstersTrapped() {	
     var tile = this.data.trapped.tile;
     for (var i = 0; i < this.data.trapped.traps.length; i++) {
@@ -259,6 +264,11 @@
     for (var i = 0; i < this.data.removed.length; i++) {
       this.map.cells[this.data.removed[i]].empty();
     }	
+  }
+  $.Turn.prototype.fxMonstersCanabalized = function fxMonstersCanabalized() {
+    for (var i = 0; i < this.data.canabalized.length; i++) {
+      this.map.cells[this.data.canabalized[i]].empty();
+    }	  
   }
 
   $.fn.Map = function(options) {
@@ -331,6 +341,10 @@
       function onPlacement(data, textStatus) {
         console.log(JSON.stringify(textStatus)+' '+JSON.stringify(data))
 
+        if (textStatus === 'error') {
+          return;
+        }
+
         var turn = new $.Turn(map, data, cell);
 
         if (data.nextTile) {
@@ -339,13 +353,15 @@
 
         if (data.placed) turn.queueFx('fxPlaceTile', 0);
         if (data.matched) turn.queueFx('fxMatchPlacement', 200);
+        if (data.removed) turn.queueFx('fxTilesRemoved', 0);
         if (data.placed) turn.queueFx('fxScore', 0);
-        if (data.moved && data.moved.moves) turn.queueFx('fxMonstersMoved', 400);
-        if (data.moved && data.moved.transports) turn.queueFx('fxMonstersTransported', 250);
+        if (data.moved && data.moved.moves) turn.queueFx('fxMonstersMoved', 500);
+        if (data.moved && data.moved.transports) turn.queueFx('fxMonstersTransported', 350);
         if (data.trapped) turn.queueFx('fxMonstersTrapped', 250);
         if (data.enchanted && data.enchanted.cursed) turn.queueFx('fxMonstersCursed', 100);
-        if (data.enchanted && data.enchanted.blessed) turn.queueFx('fxMonstersBlessed', 0);
-        if (data.removed) turn.queueFx('fxTilesRemoved', 0);
+        if (data.enchanted && data.enchanted.blessed) turn.queueFx('fxMonstersBlessed', 100);
+        if (data.summoned) turn.queueFx('fxMonstersSummoned', 100);
+        if (data.canabalized) turn.queueFx('fxMonstersCanabalized', 0);
 
         turn.run(function() {
           if (data.complete) {

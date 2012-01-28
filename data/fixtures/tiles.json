@@ -147,13 +147,13 @@
     name: "Cats of Ulthar",
     group: "monster",
     level: 1,
-    weight: 15
+    weight: 5
   },
   {
     name: "Cultist",
     group: "monster",
     level: 1,
-    weight: 30
+    weight: 15
   },
   {
     name: "Witch",
@@ -191,6 +191,7 @@
   {
     name: "Great Old One",
     group: "summoning",
-    level: 4
+    level: 4,
+    points: 3000
   }
 ]

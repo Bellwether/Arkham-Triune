@@ -1,3 +1,8 @@
 <div class="ui-body ui-body-a">
-  <%- partial('app/partials/_map') %>
+  <form id='map' action='<%- '/maps/' + locals.map._id %>' method='put'>
+    <label for='index' class='ui-hidden-accessible'></label>
+    <input type='hidden' name='index' value='' />
+
+    <%- partial('map/partials/_map') %>
+  </form>
 </div>

@@ -36,6 +36,21 @@ schema.virtual('completed').get(function () {
 schema.virtual('matcher').get(function () {
   return matcher;
 });
+schema.virtual('Tile').get(function () {
+  return tile.Model;
+});
+
+schema.virtual('points').get(function () {
+  var points = 0;
+  for (var i = 0; i < this.cells.length; i++) {
+    if (this.cells[i].tileId) {
+      var tile = this.tileAt(i);
+      if (tile.matchable && tile.points) {
+        points = points + tile.points;
+      }
+    }
+  }
+});
 schema.virtual('nextTile').get(function () {
   return this.nextTileId ? tile.Model.lookups[this.nextTileId] : null;
 });
@@ -255,6 +270,8 @@ schema.methods.swapSuspended = function swapSuspended(callback) {
 
 schema.methods.useTile = function useTile(turn, callback) {
   if (this.placeNextTile(turn.index)) {
+    this.moves = this.moves + 1;	
+
     if (this.tileAt(turn.index).matchable) {
       this.matchCells(turn);
     }
