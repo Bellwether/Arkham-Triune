@@ -39,7 +39,6 @@ schema.virtual('matcher').get(function () {
 schema.virtual('Tile').get(function () {
   return tile.Model;
 });
-
 schema.virtual('points').get(function () {
   var points = 0;
   for (var i = 0; i < this.cells.length; i++) {
@@ -192,14 +191,21 @@ schema.methods.useMythosTome = function useMythosTome(turn) {
   if (this.cells[turn.index].tileId) {
     this.nextTileId = this.cells[turn.index].tileId;
     this.cells[turn.index].tileId = null;
+    if (this.cells[turn.index].cursed) this.cells[turn.index].cursed = null; // removes curse
     turn.removeCell(turn.index);
     turn.addNextTile(this.nextTile);
   }	
 }
 schema.methods.useElderSign = function useElderSign(turn) {
   if (this.cells[turn.index].tileId) {
-    this.cells[turn.index].tileId = null;
-    turn.removeCell(turn.index);
+    if (this.cells[turn.index].cursed) {
+      // remove cursed field
+      this.cells[turn.index] = {tileId: this.cells[turn.index].tileId};
+      turn.enchanted.blessed.push(turn.index);
+    } else {
+      this.cells[turn.index].tileId = null;
+      turn.removeCell(turn.index);
+    }
   }
 }
 schema.methods.useSilverKey = function useSilverKey(turn) {
@@ -302,7 +308,11 @@ schema.methods.emplace = function emplace(index, callback) {
     return this.useTile(turn, callback);	
   }
 }
-
+schema.statics.FindRecords = function FindRecords(playerId, callback) {
+  var query = {playerId: playerId, active: false};
+  var fields = ['_id','moves','score'];
+  return this.find(query, fields, callback);
+}
 schema.statics.FindActive = function FindActive(playerId, callback) {
   var query = {playerId: playerId, active: true};
   return this.findOne(query, callback);

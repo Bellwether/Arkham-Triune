@@ -6,6 +6,15 @@ var Controller = function(req, res) {
 };
 
 routes = {
+  index: function(req, res) {	
+    var playerId = req.authentication.playerId;
+
+    function onMapsFound(err, docs) {
+	console.log(JSON.stringify(docs))
+      res.render('map/index');
+    }
+    map.Model.FindRecords(playerId, onMapsFound);
+  },
   update: function(req, res) {
     var playerId = req.authentication.playerId;
     var index = req.body.index;

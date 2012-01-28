@@ -2,7 +2,7 @@
   <% if (locals.map) { %>
     <a id='store' href="/items" data-rel="dialog" data-icon="star" data-role='button' data-title='Starry Wisdom Bazaar'>Starry Wisdom Bazaar</a>
   <% } %>
-  <h1>Arkham Triune</h1>
+  <h1><a href='/'>Arkham Triune</a></h1>
   <% if (locals.map) { %>
     <form id='restart' action='<%- '/maps/' + locals.map._id %>' method='delete' style='display:inline' class="ui-btn-right">
       <input id='restart-button' type="submit" data-icon="refresh" value='Restart Town' />

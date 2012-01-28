@@ -1,17 +1,2 @@
-<% if (locals.map) { %>
-  <table id='grid'>
-  <% for (var y = 0; y < locals.map.size; y++) { %>
-    <tr>
-      <% for (var x = 0; x < locals.map.size; x++) { %>
-        <% var index = (y * locals.map.size) + x %>
-        <% var tile = locals.map.tileAt(index) %>
-        <td>
-          <div class='tile <%- tile ? tile.name.replace(/\s/,'-') : 'empty' %><%- tile && locals.map.cells[index].cursed ? ' cursed' : '' %>'>
-          <%- tile ? tile.name : '[x]' %>
-          </div>
-        </td>
-      <% } %>
-    </tr>
-  <% } %>
-  </table>
-<% } %>
+<li data-icon='star' data-theme='c'>
+</li>

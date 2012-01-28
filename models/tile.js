@@ -38,7 +38,7 @@ schema.virtual('transportableMonster').get(function () {
   return this.monster && !this.level < 4 && !this.helpingMonster;
 });
 schema.virtual('summoningMonster').get(function () {
-  return this.monster && !this.level < 5 && !this.helpingMonster;
+  return this.monster && this.level >= 4 && !this.helpingMonster;
 });
 schema.virtual('monster').get(function () {
   return this.group === 'monster';
