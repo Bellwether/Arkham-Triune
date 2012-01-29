@@ -17,9 +17,14 @@ var struct = {
   moves: {type: Number, default: 0},
   nextTileId: Schema.ObjectId,
   playerId: String,
-  score: {type: Number, default: 0}
+  score: {type: Number, default: 0},
+  createdAt: Date,
+  finishedAt: Date
 }
 var schema = new Schema(struct);
+schema.virtual('pointsPerMove').get(function () {
+  return Math.floor(this.score / this.moves); 
+});
 schema.virtual('size').get(function () {
   return 6;
 });
@@ -159,7 +164,8 @@ schema.methods.upgradeTurnMatched = function upgradeTurnMatched(turn) {
 }
 schema.methods.complete = function complete(turn) {
   this.active = false;
-  if (turn) turn.complete = true
+  this.finishedAt = Date.now();
+  if (turn) turn.complete = true;
 }
 schema.methods.useMagic = function useMagic(turn, callback) {
   var title = this.nextTile.name;
@@ -332,8 +338,10 @@ schema.statics.FindOrCreate = function FindOrCreate(playerId, callback) {
   });
 }
 schema.statics.Create = function Create(playerId, callback) {
+  var createdAt = Date.now();
   var map = new this({
-    playerId: playerId
+    playerId: playerId,
+    createdAt: createdAt
   });
   for (var i = 0; i < map.size * map.size; i++) {
     map.cells.push({tileId: null});

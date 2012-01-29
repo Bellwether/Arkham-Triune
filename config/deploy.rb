@@ -68,7 +68,7 @@ namespace :deploy do
       export HOME="/home/#{admin_runner}"
       export NODE_ENV="#{node_env}"
       cd #{current_path}
-      exec sudo -u #{admin_runner} sh -c "NODE_ENV=#{node_env} #{application_binary} #{current_path}/#{node_file} >> #{shared_path}/log/#{node_env}.log 2>&1"
+      exec sudo sh -c "NODE_ENV=#{node_env} #{application_binary} #{current_path}/#{node_file} >> #{shared_path}/log/#{node_env}.log 2>&1"
   end script
   respawn
 UPSTART

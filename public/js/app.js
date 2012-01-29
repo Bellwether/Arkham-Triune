@@ -36,6 +36,7 @@ $(document).ready(function() {
 });
 
 $(document).bind('mobileinit', function() {
+  $.mobile.defaultPageTransition = 'fade';
 });
 
 $('div[data-role="page"]').live('pagehide',function(event, ui) {

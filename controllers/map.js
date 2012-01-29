@@ -11,7 +11,7 @@ routes = {
 
     function onMapsFound(err, docs) {
 	console.log(JSON.stringify(docs))
-      res.render('map/index');
+      res.render('map/index', {maps: docs});
     }
     map.Model.FindRecords(playerId, onMapsFound);
   },
