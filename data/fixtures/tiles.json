@@ -22,7 +22,7 @@
     group: "religion",
     level: 1,
     weight: 10,
-    points: 10
+    points: 15
   },
   {
     name: "Chapel",
@@ -60,7 +60,7 @@
     group: "agriculture",
     level: 2,
     weight: 5,
-    points: 10
+    points: 15
   },
   {
     name: "Farmstead",
@@ -92,7 +92,7 @@
     group: "housing",
     level: 2,
     weight: 5,
-    points: 10
+    points: 15
   },
   {
     name: "Townhouse",

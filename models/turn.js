@@ -100,22 +100,26 @@ schema.virtual('serialize').get(function() {
 schema.methods.newMatch = function newMatch(index) {
   return new schema({index: index});
 }
-schema.methods.setRewardsFromMatched = function setRewardsFromMatched() {
+schema.methods.setRewardsFromMatched = function setRewardsFromMatched(rewarder) {
   this.points = 0;
   this.wisdom = 0;
 
   for (var i = 0; i < this.matched.length; i++) {
     this.points = this.points + this.matched[i].points;
-    this.wisdom = this.wisdom + this.matched[i].wisdom;
   }
+  this.wisdom = rewarder.wisdom(this.points);
+  console.log('turn wisdom '+this.wisdom+' for points '+this.points)
 }
-schema.methods.setRewardsFromTrapped = function setRewardsFromTrapped() {
+schema.methods.setRewardsFromTrapped = function setRewardsFromTrapped(rewarder) {
+  this.points = this.points || 0;
+  this.wisdom = this.wisdom || 0;
+	
   for (var i = 0; i < this.trapped.matched.length; i++) {
     this.points = this.points + this.trapped.matched[i].points;
-    this.wisdom = this.wisdom + this.trapped.matched[i].wisdom;
-  }
+  }	
+  this.wisdom = this.wisdom + rewarder.wisdom(this.points);
+console.log('setRewardsFromTrapped '+JSON.stringify(this.trapped.matched)+ ' wisdom='+this.wisdom+' points='+this.points);
 }
-
 
 schema.methods.addCanabalized = function addCanabalized(index) {
   if (index && this.canabalized.indexOf(index) < 0) this.canabalized.push(index);

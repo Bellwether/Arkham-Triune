@@ -1,5 +1,5 @@
 set :application, "arkhamtriune"
-set :domain, "ec2-?-?-?-?.compute-1.amazonaws.com"
+set :domain, "ec2-107-22-191-148.compute-1.amazonaws.com"
 set :user, "ubuntu"
 set :admin_runner, 'ubuntu'
 set :use_sudo, false
@@ -18,7 +18,8 @@ set :keep_releases, 2
 server domain, :app, :web, :db, :primary => true
 
 set :node_file, "main.js"
-set :application_binary, '/usr/local/bin/node'
+set :node_env, "production"
+set :application_binary, '/usr/bin/node'
 set :deploy_to, "/opt/#{application}"
 
 namespace :deploy do
@@ -74,6 +75,19 @@ namespace :deploy do
 UPSTART
   put upstart_script, "/tmp/#{application}.conf"
     run "sudo mv /tmp/#{application}.conf /etc/init/#{application}.conf"
+  end  
+end
+
+namespace :aptget do
+  desc "Updates apt-get package list"
+  task :update, :roles => :app do
+    run "sudo apt-get update"
+  end
+    
+  desc "Sets default server localization"
+  task :timezone, :roles => :app do
+    run "sudo locale-gen en_GB.UTF-8"
+    run "sudo /usr/sbin/update-locale LANG=en_GB.UTF-8"
   end  
 end
 

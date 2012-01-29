@@ -2,6 +2,7 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var tile = require('./tile');
 var cell = require('./cell');
+var player = require('./player');
 var seeder = require('./../lib/mechanics/seeder');
 var dealer = require('./../lib/mechanics/dealer');
 var matcher = require('./../lib/mechanics/matcher');
@@ -40,6 +41,9 @@ schema.virtual('completed').get(function () {
 });
 schema.virtual('matcher').get(function () {
   return matcher;
+});
+schema.virtual('rewarder').get(function () {
+  return rewarder;
 });
 schema.virtual('Tile').get(function () {
   return tile.Model;
@@ -130,8 +134,11 @@ schema.methods.awardPoints = function awardPoints(match) {
   match.points = rewarder.points(this, match);
   this.score = this.score + match.points;
 }
-schema.methods.awardWisdom = function awardWisdom(match) {
-  return rewarder.wisdom(match.points);
+schema.methods.awardWisdom = function awardWisdom(turn) {
+  if (turn.wisdom > 0) {
+    player.Model.Wisen(this.playerId, turn.wisdom);
+	console.log('awardWisdom '+turn.wisdom)
+  }
 }
 schema.methods.trap = function trap(index) {
   var trappedTile = tile.Model.findByName("Magic Pentagram");
@@ -152,7 +159,6 @@ console.log("UPGRADE TILE FROM "+JSON.stringify(match.tile)+" TO "+JSON.stringif
 }
 schema.methods.upgradeTurnMatch = function upgradeTurnMatch(match) {
   this.awardPoints(match);
-  this.awardWisdom(match);
   this.upgradeCells(match);
 }
 schema.methods.upgradeTurnMatched = function upgradeTurnMatched(turn) {
@@ -160,7 +166,7 @@ schema.methods.upgradeTurnMatched = function upgradeTurnMatched(turn) {
   turn.matched.forEach(function(match) {
     self.upgradeTurnMatch(match);
   });		
-  turn.setRewardsFromMatched();
+  turn.setRewardsFromMatched(rewarder);
 }
 schema.methods.complete = function complete(turn) {
   this.active = false;
@@ -255,6 +261,8 @@ console.log('+++++  UPGRADING TO BEST TILE ('+bestMatchTileId+') '+JSON.stringif
   }
 
   monsters.act(this, turn);
+
+  this.awardWisdom(turn);
 }
 schema.methods.matchRepeat = function matchRepeat(matches, index) {
   matcher.matchRepeat(this, Match, matches, index);
@@ -296,6 +304,8 @@ schema.methods.useTile = function useTile(turn, callback) {
       this.dealTile();
       turn.addNextTile(this.nextTile);
     }
+
+    this.awardWisdom(turn);
 
     this.markModified("cells");
     this.save(function (err, doc) {

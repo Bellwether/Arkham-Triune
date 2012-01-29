@@ -15,6 +15,24 @@
       return this.label() ? this.label().html() : this.moves.html();
     }
   }
+
+  $.Wisdom = function(map, options) {
+    this.map = map;
+    this.wisdom = $('#'+options.wisdomElemId);
+  }
+  $.Wisdom.prototype.label = function label() {
+    return this.wisdom.find('.ui-btn-text');
+  }
+  $.Wisdom.prototype.text = function text(val) {
+    if (val) {
+      var current = parseInt(this.text());
+      var updated = current + parseInt(val);
+      (this.label() || this.wisdom).html(updated);
+    } else {
+      return this.label() ? this.label().html() : this.wisdom.html();
+    }
+  }
+
 	
   $.Score = function(map, options) {
     this.map = map;
@@ -198,7 +216,7 @@
       this.map.moves.text(1);	
       this.cell.emplace(tile);
     } else {		
-      this.cell.empty();
+      this.cell.deselect();
     }
   }
   $.Turn.prototype.fxScore = function fxScore() {	
@@ -280,6 +298,7 @@
     map.suspendedTile = new $.SuspendedTile(map, options);
     map.grid = $('#'+options.gridElemId);
     map.score = new $.Score(map, options);
+    map.wisdom = new $.Wisdom(map, options);
     map.moves = new $.Moves(map, options);
 
     map.input = map.find('input[name="index"]');

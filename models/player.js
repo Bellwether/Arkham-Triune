@@ -6,6 +6,23 @@ var struct = {
 }
 var schema = new Schema(struct);
 
+
+schema.statics.Wisen = function Wisen(playerId, wisdom, callback) {
+  if (wisdom === 0) {
+    if (typeof callback === 'function') callback('No change in wisdom');
+    return;	
+  }
+  function onPlayer(err, doc) {
+    if (doc) {	
+      doc.wisdom = Math.max(doc.wisdom + wisdom, 0);
+      doc.save(callback);
+    } else {
+      if (typeof callback === 'function') callback(err || 'Player not found');
+    }
+  }
+
+  return this.findOne({_id: playerId}, onPlayer);	
+}
 schema.statics.Find = function Find(playerId, callback) {
   var query = {_id: playerId};
   return this.findOne(query, callback);
