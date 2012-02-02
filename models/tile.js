@@ -5,6 +5,7 @@ var struct = {
   name: String,
   group: String,
   level: Number,
+  move: { type: Number, default: 0},
   points: { type: Number, default: 0 },
   weight: { type: Number, default: 0 }
 }
@@ -25,20 +26,20 @@ schema.virtual('seedable').get(function () {
 schema.virtual('helpingMonster').get(function () {
   return this.name === 'Cats of Ulthar';
 });
+schema.virtual('trapableMonster').get(function () {
+  return !this.warpingMonster && this.level < 3;	
+});
 schema.virtual('cursingMonster').get(function () {
   return this.monster && this.level > 1 && !this.helpingMonster;
 });
 schema.virtual('warpingMonster').get(function () {
   return this.monster && this.level > 2 && !this.helpingMonster;
 });
-schema.virtual('trapableMonster').get(function () {
-  return !this.warpingMonster && this.level < 3;	
-});
 schema.virtual('transportableMonster').get(function () {
   return this.monster && !this.level < 4 && !this.helpingMonster;
 });
 schema.virtual('summoningMonster').get(function () {
-  return this.monster && this.level >= 4 && !this.helpingMonster;
+  return this.monster && this.level > 3 && !this.helpingMonster;
 });
 schema.virtual('monster').get(function () {
   return this.group === 'monster';

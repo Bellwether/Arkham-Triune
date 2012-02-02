@@ -50,7 +50,16 @@ var AppController = function(req, res, next) {
 
   this.AppRoutes = {
     index: renderAppIndex,
-    create: renderAppIndex
+    create: renderAppIndex,
+    privacy: function(req, res) {
+      res.render('app/tos');
+    },
+    tos: function(req, res) {
+      res.render('app/tos');
+    },
+    support: function(req, res) {
+      res.render('app/support');
+    }
   }
 
   this.before_filter = function(req, res, callback) {
@@ -63,5 +72,5 @@ var AppController = function(req, res, next) {
 
 module.exports = {
   Controller: AppController,
-  Routes: ['index','create']
+  Routes: ['index', 'create', 'tos', 'privacy', 'support']
 }

@@ -47,6 +47,11 @@ namespace :deploy do
   task :update_submodules, :roles => :app do
     run "cd #{release_path}; git submodule init && git submodule update"
   end
+  
+  desc "Install npm or update it to latest version"
+  task :install_npm, :roles => :app do
+    run "curl http://npmjs.org/install.sh | sudo sh"
+  end
 
   desc "create deployment directory"
   task :create_deploy_to_with_sudo, :roles => :app do
@@ -78,10 +83,22 @@ UPSTART
   end  
 end
 
+namespace :logs do
+  desc "Tails node production log"
+  task :tail, :roles => :app do
+    run "tail -500 #{shared_path}/log/#{node_env}.log"
+  end
+end
+
 namespace :aptget do
   desc "Updates apt-get package list"
   task :update, :roles => :app do
     run "sudo apt-get update"
+  end
+  
+  desc "Upgrades system packages"
+  task :upgrade, :roles => :app do
+    run "sudo apt-get upgrade -y"
   end
     
   desc "Sets default server localization"
@@ -89,6 +106,24 @@ namespace :aptget do
     run "sudo locale-gen en_GB.UTF-8"
     run "sudo /usr/sbin/update-locale LANG=en_GB.UTF-8"
   end  
+end
+
+namespace :instance do
+  desc "Displays the installed app versions on the stack"
+  task :stack, :roles => :app do
+    run "node -v"
+    run "npm -v"    
+  end
+    
+  desc "Show the amount of free disk space."
+  task :disk_space, :roles => :app do
+    run "df -h /"
+  end
+
+  desc "Display amount of free and used memory in the system."
+  task :free, :roles => :app do
+    run "free -m"
+  end
 end
 
 before 'deploy:setup', 'deploy:create_deploy_to_with_sudo'

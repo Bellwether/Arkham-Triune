@@ -3,24 +3,28 @@
     name: "Elder Sign",
     group: "magic",
     level: 1,
+    move: 25,
     weight: 10
   },
   {
     name: "Silver Key",
     group: "magic",
     level: 1,
+    move: 10,
     weight: 5
   },
   {
     name: "Mythos Tome",
     group: "magic",
     level: 1,
+    move: 50,
     weight: 1
   },
   {
     name: "Mission",
     group: "religion",
     level: 1,
+    move: 0,
     weight: 10,
     points: 15
   },
@@ -49,9 +53,10 @@
     points: 100
   },
   {
-    name: "Farmland",
+    name: "Willow Grove",
     group: "agriculture",
     level: 1,
+    move: 0,
     weight: 25,
     points: 5
   },
@@ -59,6 +64,7 @@
     name: "Orchard",
     group: "agriculture",
     level: 2,
+    move: 10,
     weight: 5,
     points: 15
   },
@@ -84,6 +90,7 @@
     name: "Cottage",
     group: "housing",
     level: 1,
+    move: 0,
     weight: 25,
     points: 5
   },
@@ -91,6 +98,7 @@
     name: "Cape Cod",
     group: "housing",
     level: 2,
+    move: 10,
     weight: 5,
     points: 15
   },
@@ -116,43 +124,46 @@
     name: "Union Center",
     group: "fraternity",
     level: 1,
+    move: 25,
     weight: 10,
-    points: 15
+    points: 20
   },
   {
     name: "Fraternal Hall",
     group: "fraternity",
     level: 2,
-    points: 40
+    points: 50
   },
   {
     name: "Masonic Lodge",
     group: "fraternity",
     level: 3,
-    points: 75
+    points: 100
   },
   {
     name: "Temple",
     group: "fraternity",
     level: 4,
-    points: 125
+    points: 150
   },
   {
     name: "Grand Lodge",
     group: "fraternity",
     level: 5,
-    points: 150
+    points: 300
   },
   {
     name: "Cats of Ulthar",
     group: "monster",
     level: 1,
+    move: 50,
     weight: 5
   },
   {
     name: "Cultist",
     group: "monster",
     level: 1,
+    move: 10,
     weight: 15
   },
   {
