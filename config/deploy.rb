@@ -27,6 +27,10 @@ set :application_binary, '/usr/bin/node'
 set :deploy_to, "/opt/#{application}"
 
 namespace :deploy do
+  
+  task :migrate, :roles => :app do
+  end
+  
   desc "Start app using upstart script"  
   task :start, :roles => :app, :except => { :no_release => true } do
     run "sudo start #{application}"
