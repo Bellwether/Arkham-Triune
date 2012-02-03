@@ -9,6 +9,7 @@ var matcher = require('./../lib/mechanics/matcher');
 var monsters = require('./../lib/mechanics/monsters');
 var rewarder = require('./../lib/mechanics/rewarder');
 var Turn = require('./turn').Model;
+var Score = require('./score').Model;
 var Match = require('./turn').Match;
 
 var struct = {
@@ -177,6 +178,7 @@ schema.methods.complete = function complete(turn) {
   if (bonusWisdom > 0) {
     player.Model.Wisen(this.playerId, bonusWisdom);
   }
+  Score.Create(this.playerId, this.mapId, this.score);
   if (turn) turn.complete = true;
 }
 schema.methods.useMagic = function useMagic(turn, callback) {

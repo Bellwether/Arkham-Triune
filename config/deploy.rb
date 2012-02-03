@@ -4,6 +4,10 @@ set :user, "ubuntu"
 set :admin_runner, 'ubuntu'
 set :use_sudo, false
 
+set :db_host, "ds029787.mongolab.com:29787"
+set :db_user, "arkham"
+set :db_password, "triune"
+
 set :repository, "git@github.com:Bellwether/Arkham-Triune.git"
 set :scm, :git
 set :branch, "master"
@@ -88,6 +92,11 @@ namespace :logs do
   task :tail, :roles => :app do
     run "tail -500 #{shared_path}/log/#{node_env}.log"
   end
+
+  desc "Empty node production log"  
+  task :clear, :roles => :app do  
+    run "> #{shared_path}/log/#{node_env}.log"
+  end
 end
 
 namespace :aptget do
@@ -123,6 +132,21 @@ namespace :instance do
   desc "Display amount of free and used memory in the system."
   task :free, :roles => :app do
     run "free -m"
+  end
+  
+  desc "Display the local environmental variables"
+  task :env, :roles => :app do
+    run "env"
+  end
+end
+
+namespace :db do
+  desc "Imports fixtures folder"
+  task :seed, :roles => :db do
+    puts File.dirname(__FILE__)
+    Dir.glob('./data/fixtures/*.json') do |fixture|
+      system "mongoimport -h #{db_host} -u #{db_user} -p #{db_password} --file #{fixture} -vvv --db #{application} --collection #{fixture.split('/').last.split('.').first} --upsert --upsertFields name --jsonArray --stopOnError --type json"
+    end
   end
 end
 
