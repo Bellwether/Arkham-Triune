@@ -70,13 +70,11 @@ namespace :deploy do
   desc "Creates SSL key and self-signed certificate"
   task :create_ssl_certificate, :roles => :app do
     set :ssl_key, "/etc/ssl/private/#{application}.key.pem"
-    set :ssl_cert, "/etc/ssl/private/#{application}.cert.pem"    
+    set :ssl_cert, "/etc/ssl/certs/#{application}.cert.pem"    
     run "sudo openssl genrsa -out #{ssl_key}"
     run "sudo openssl req -new -key #{ssl_key} -out csr.pem -subj '/C=US/ST=/L=/O=/CN=#{domain}'"
     run "sudo openssl x509 -req -days 9999 -signkey #{ssl_key} -out #{ssl_cert} -in csr.pem"
     run "sudo rm csr.pem"
-    # openssl req -new -x509 -nodes -out /etc/ssl/certs/arkham.crt -keyout /etc/ssl/private/arkham.key
-    # sudo openssl req -new -x509 -nodes -out /etc/ssl/certs/arkham.crt -keyout /etc/ssl/private/arkham.key
   end  
   
   desc "Writes the upstart script for running the app daemon"
