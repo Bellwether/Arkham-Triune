@@ -1,7 +1,15 @@
 <div class="ui-body ui-body-a">
-  <h2>Arkham, MA</h2>	
-  <h2>Score: <%- locals.map.score %> </h2>
-  <h2>Moves: <%- locals.map.moves %> </h2>
+  <div class="ui-grid-a">
+    <div class="ui-block-a">
+      <h3>Score: <%- locals.map.score %> </h3>
+      <h3>Wisdom Bonus: +<%- locals.map.bonusWisdom %> </h3>
+    </div>
+    <div class="ui-block-b">
+      <h3>Moves: <%- locals.map.moves %> </h3>	
+      <h3>Average points per move: <%- locals.map.pointsPerMove %></h3>
+    </div>
+  </div>
+
   <br />
   <div id='map'>
     <%- partial('map/partials/_map_grid') %>

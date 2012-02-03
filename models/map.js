@@ -45,6 +45,9 @@ schema.virtual('matcher').get(function () {
 schema.virtual('rewarder').get(function () {
   return rewarder;
 });
+schema.virtual('bonusWisdom').get(function () {
+  return rewarder.mapAward(this);
+});
 schema.virtual('Tile').get(function () {
   return tile.Model;
 });
@@ -137,7 +140,6 @@ schema.methods.awardPoints = function awardPoints(match) {
 schema.methods.awardWisdom = function awardWisdom(turn) {
   if (turn.wisdom > 0) {
     player.Model.Wisen(this.playerId, turn.wisdom);
-	console.log('awardWisdom '+turn.wisdom)
   }
 }
 schema.methods.trap = function trap(index) {
@@ -171,6 +173,10 @@ schema.methods.upgradeTurnMatched = function upgradeTurnMatched(turn) {
 schema.methods.complete = function complete(turn) {
   this.active = false;
   this.finishedAt = Date.now();
+  var bonusWisdom = this.bonusWisdom;
+  if (bonusWisdom > 0) {
+    player.Model.Wisen(this.playerId, bonusWisdom);
+  }
   if (turn) turn.complete = true;
 }
 schema.methods.useMagic = function useMagic(turn, callback) {
