@@ -4,18 +4,20 @@ var Schema = mongoose.Schema;
 var struct = {
   createdAt: Date,	
   mapId: String,
+  moves: Number,
   points: Number,
   playerId: String
 }
 var schema = new Schema(struct);
 
-schema.statics.Create = function Create(playerId, mapId, points, callback) {
+schema.statics.Create = function Create(playerId, mapId, params, callback) {
   var createdAt = Date.now();
   var score = new this({
     createdAt: createdAt,
     mapId: mapId,
+    moves: params.moves,
     playerId: playerId,
-    points: points
+    points: params.points
   });
 
   return score.save(function (err, doc) {

@@ -1,0 +1,12 @@
+<ul class='leaderboard' data-role="listview" data-theme="g">
+  <li data-icon='none' data-theme='b'>
+    <br />
+    <h3>High Scores Leaderboard</h3>
+  </li>	
+  <% for (var i = 0; i < leaderboard.scores.length; i++ ) { %>
+    <li>
+      <h3># <%- i+1 %>: Player <%- leaderboard.scores[i].playerId %></h3>
+      <h4>Score <%- leaderboard.scores[i].points %></h4>
+    </li>
+  <% } %>
+</ul>

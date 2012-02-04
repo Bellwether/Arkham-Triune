@@ -47,7 +47,7 @@ schema.virtual('rewarder').get(function () {
   return rewarder;
 });
 schema.virtual('bonusWisdom').get(function () {
-  return rewarder.mapAward(this);
+  return parseInt(rewarder.mapAward(this));
 });
 schema.virtual('Tile').get(function () {
   return tile.Model;
@@ -178,7 +178,8 @@ schema.methods.complete = function complete(turn) {
   if (bonusWisdom > 0) {
     player.Model.Wisen(this.playerId, bonusWisdom);
   }
-  Score.Create(this.playerId, this.mapId, this.score);
+  var opts = {points: this.score, moves: this.moves};
+  Score.Create(this.playerId, this.mapId, opts);
   if (turn) turn.complete = true;
 }
 schema.methods.useMagic = function useMagic(turn, callback) {
