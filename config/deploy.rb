@@ -104,6 +104,11 @@ end
 namespace :logs do
   desc "Tails node production log"
   task :tail, :roles => :app do
+    run "tail -75 #{shared_path}/log/#{node_env}.log"
+  end
+    
+  desc "Tails node production log (500 lines)"
+  task :long_tail, :roles => :app do
     run "tail -500 #{shared_path}/log/#{node_env}.log"
   end
 
