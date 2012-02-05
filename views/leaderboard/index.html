@@ -1,7 +1,7 @@
 <div class="ui-body ui-body-a">
   <h2>Census Bureau</h2>	
   <br />
-  <p>Earn your place among the masters of space and time by ranking on the leaderboards with your accomplishments.</p>
+  <p>Earn your place among the masters of space and time by ranking on the leaderboards.</p>
   <br />
   <% for (var i = 0; i < locals.leaderboards.length; i++ ) { %>
     <%- partial('leaderboard/partials/'+locals.leaderboards[i].type, {leaderboard: locals.leaderboards[i]}) %>

@@ -5,7 +5,7 @@ var score = require('./score');
 var ranking = {
   mapId: String,
   playerId: String,
-  points: Number
+  points: Number,
 };
 
 var struct = {
@@ -51,7 +51,7 @@ schema.statics.NewLeaderboard = function NewLeaderboard(rankingAttribute, callba
     findDate.setDate(findDate.getDate() - twoWeeksInDays);
 
     var filter = {limit: 25, sort: {}};
-    filter.sort[rankingAttribute] = 1;
+    filter.sort[rankingAttribute] = -1;
 
     score.Model.find({'createdAt': {'$gt': findDate}}, [], filter, onScores);
   });

@@ -6,7 +6,7 @@
   <% for (var i = 0; i < leaderboard.scores.length; i++ ) { %>
     <li>
       <h3># <%- i+1 %>: Player <%- leaderboard.scores[i].playerId %></h3>
-      <h4>Moves <%- leaderboard.scores[i].moves %></h4>
+      <h4>Moves <%- leaderboard.scores[i].points %></h4>
     </li>
   <% } %>
 </ul>
