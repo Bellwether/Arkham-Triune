@@ -19,6 +19,9 @@ var Controller = function(req, res) {
 
 routes = {
   new: function(req, res) {
+    var fb = new client();
+    var opts = {OAuthDialogUrl: fb.getOAuthDialogUrl(), layout: 'app/layouts/blank'};
+    res.render('facebook/new', opts);
   },
 
   create: function(req, res) {

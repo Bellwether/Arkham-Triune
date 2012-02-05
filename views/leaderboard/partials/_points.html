@@ -7,6 +7,7 @@
     <li>
       <h3># <%- i+1 %>: Player <%- leaderboard.scores[i].playerId %></h3>
       <h4>Score <%- leaderboard.scores[i].points %></h4>
+      <p class='ui-li-aside'><%- leaderboard.scores[i].createdAt %></p>
     </li>
   <% } %>
 </ul>

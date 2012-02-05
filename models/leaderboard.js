@@ -3,6 +3,7 @@ var Schema = mongoose.Schema;
 var score = require('./score');
 
 var ranking = {
+  createdAt: Date,
   mapId: String,
   playerId: String,
   points: Number,
@@ -39,7 +40,7 @@ schema.statics.NewLeaderboard = function NewLeaderboard(rankingAttribute, callba
 
     function onScores(err, docs) {
       docs.forEach(function(doc) {
-        var ranking = {mapId: doc.mapId, playerId: doc.playerId, points: doc[rankingAttribute]};
+        var ranking = {mapId: doc.mapId, playerId: doc.playerId, points: doc[rankingAttribute], createdAt: doc.createdAt};
         leaderboard.scores.push(ranking);
       });
 
