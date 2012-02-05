@@ -14,7 +14,7 @@ schema.statics.Wisen = function Wisen(playerId, wisdom, callback) {
   }
   function onPlayer(err, doc) {
     if (doc) {	
-      doc.wisdom = Math.max(doc.wisdom + wisdom, 0);
+      doc.wisdom = Math.max(doc.wisdom + parseInt(wisdom), 0);
       doc.save(callback);
     } else {
       if (typeof callback === 'function') callback(err || 'Player not found');
