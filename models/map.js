@@ -123,7 +123,7 @@ schema.methods.tileAt = function tileAt(index) {
   }
 }
 schema.methods.dealTile = function dealTile() {
-  this.nextTileId = dealer.deal(tile.Model.list)._id;
+  this.nextTileId = dealer.deal(tile.Model.list, this.moves)._id;
 }
 schema.methods.placeNextTile = function placeNextTile(index) {
   var cellEmpty = this.cells[index].tileId ? false : true;

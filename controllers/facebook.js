@@ -25,13 +25,9 @@ routes = {
 	
   new: function(req, res) {
     var fb = new client();
-    var opts = {OAuthDialogUrl: fb.getOAuthDialogUrl(req.session.id), layout: 'app/layouts/blank'};
+    var stateToken = req.session.id;
+    var opts = {OAuthDialogUrl: fb.getOAuthDialogUrl(stateToken), layout: 'app/layouts/blank'};
     res.render('facebook/new', opts);
-  },
-
-  create: function(req, res) {
-    var fbr = new FacebookAPIRequest(req);
-
   }
 }
 

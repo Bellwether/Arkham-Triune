@@ -18,14 +18,13 @@ filter: progid:DXImageTransform.Microsoft.Shadow(Strength=15, Direction=135, Col
 margin:5px auto 10px auto;
 }
 #map #grid td {
-font-size:14px;
+font-size:12px;
 height:96px;
 position:relative;
 width:96px;
 }
 
 #map.small #grid td {
-font-size:12px;
 height:64px;
 width:64px;
 }
@@ -37,7 +36,15 @@ position:absolute;
 width:100%;
 }
 
-
+.tile {
+line-height:75px;
+white-space:nowrap;
+}
+.tile.empty {
+background-color:#181818;
+height:inherit;
+width:inherit;
+}
 
 .Cultist, .Witch, .Magus, .Servitor {
 color:red;	

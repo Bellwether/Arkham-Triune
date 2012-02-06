@@ -10,7 +10,7 @@
     name: "Silver Key",
     group: "magic",
     level: 1,
-    move: 10,
+    move: 15,
     weight: 5
   },
   {
@@ -163,7 +163,7 @@
     name: "Cultist",
     group: "monster",
     level: 1,
-    move: 10,
+    move: 20,
     weight: 15
   },
   {

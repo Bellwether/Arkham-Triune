@@ -21,7 +21,9 @@ schema.virtual('matchable').get(function () {
          this.group !== 'magic';	
 });
 schema.virtual('seedable').get(function () {
-  return parseInt(this.level) === 1 && this.landscape;
+  return parseInt(this.level) === 1 && 
+         (this.move && this.move < 2) && 
+         this.landscape;
 });
 schema.virtual('helpingMonster').get(function () {
   return this.name === 'Cats of Ulthar';
