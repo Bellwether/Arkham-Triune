@@ -18,9 +18,14 @@ var Controller = function(req, res) {
 };
 
 routes = {
+  index: function(req, res) {
+    var fbr = new FacebookAPIRequest(req);
+
+  },
+	
   new: function(req, res) {
     var fb = new client();
-    var opts = {OAuthDialogUrl: fb.getOAuthDialogUrl(), layout: 'app/layouts/blank'};
+    var opts = {OAuthDialogUrl: fb.getOAuthDialogUrl(req.session.id), layout: 'app/layouts/blank'};
     res.render('facebook/new', opts);
   },
 
