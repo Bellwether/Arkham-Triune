@@ -1,7 +1,13 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
+var fb = require('./../lib/facebook/graph/user');
 
 var struct = {
+  facebook: {
+    accessToken: String,
+    expiresAt: Date,
+    userId: String
+  },
   wisdom: {type: Number, default: 50}
 }
 var schema = new Schema(struct);
@@ -22,6 +28,16 @@ schema.statics.Wisen = function Wisen(playerId, wisdom, callback) {
   }
 
   return this.findOne({_id: playerId}, onPlayer);	
+}
+schema.statics.RequestFacebookUser = function RequestFacebookUser(accessToken, callback) {
+  fb.Get(accessToken, function(err, data) {
+    console.log("RequestFacebookUser: "+JSON.stringify(data));
+    callback(err, data);
+  })
+}
+schema.statics.FindByFacebookId = function FindByFacebookId(userId, callback) {
+  var query = {'facebook.userId': userId};
+  return this.findOne(query, callback);
 }
 schema.statics.Find = function Find(playerId, callback) {
   var query = {_id: playerId};

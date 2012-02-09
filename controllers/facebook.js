@@ -17,10 +17,26 @@ var Controller = function(req, res) {
   baseController.call(this, req, res);
 };
 
+function authenticateUser(fbr) {
+  var fb = new client();
+  var code = fbr.code;
+
+  fb.requestAccessToken(fbr.code, function(err, data) {
+    console.log("requestAccessToken() "+err+' '+JSON.stringify(data));
+  });	
+}
+
 routes = {
   index: function(req, res) {
     var fbr = new FacebookAPIRequest(req);
 
+    if (fbr.isAuthenticating()) {
+      authenticateUser(fbr);
+    } else if (fbr.hasError()) {
+      res.render('facebook/index', {errorDescription: fbr.error_description});
+    } else {
+      res.render('facebook/index');
+    };
   },
 	
   new: function(req, res) {
