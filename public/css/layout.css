@@ -9,3 +9,15 @@ margin-top: 15px;
 .ui-li-aside {
 padding-right:5px;	
 }
+
+.ui-footer .ui-navbar ul {
+height:70px;
+line-height:50px;
+}
+.ui-footer .ui-navbar .ui-btn-text {
+font-size:16px;
+}
+
+.ui-header .ui-title fieldset {
+margin-right:10px;
+}

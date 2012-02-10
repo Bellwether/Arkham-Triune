@@ -227,14 +227,17 @@
     for (var i = 0; i < this.data.matched.length; i++) {
       var match = this.data.matched[i];
       for (var j = 0; j < match.cells.length; j++) {	
-        this.map.cells[match.cells[j]].empty();
+        var index = match.cells[j];
+		$.SFX().transfer(this.map.cells[index].tile, this.map.cells[match.index].tile);
+        this.map.cells[index].empty();
       };
       this.map.cells[match.index].emplace(match.tile);
     }
   }
   $.Turn.prototype.fxMonstersMoved = function fxMonstersMoved() {	
     for (var i = 0; i < this.data.moved.moves.length; i++) {
-      var path = this.data.moved.moves[i].path;
+      var path = this.data.moved.moves[i].path;	
+      $.SFX().transfer(this.map.cells[path[0]].tile, this.map.cells[path[1]].tile);
       this.map.moveCell(path[0], path[1]);
     }
   }
