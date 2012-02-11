@@ -33,6 +33,7 @@ $(document).ready(function() {
     });
   }
 
+  if (window.location.hash == '#_=_') window.location.hash = '';
 });
 
 $(document).bind('mobileinit', function() {
