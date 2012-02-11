@@ -2,12 +2,32 @@
   <label for='id' class='ui-hidden-accessible'></label>
   <input type='hidden' name='id' value='' />
 
+  <div data-role='navbar' class='panel'>
+    <ul>
+      <li><a href='#' class='ui-btn-active' data-panel='tile-store'>Buy Tiles</a></li>
+      <li><a href='#' data-panel='magic-store'>Buy Magic</a></li>
+      <li><a href='#' data-panel='wisdom-store'>Buy Wisdom</a></li>
+    </ul>
+  </div>
+
   <center>
-    <ul id='bazaar' data-role="listview" data-theme="g">
+    <ul id='tile-store' class='store' data-role='listview' data-theme='g'>
       <li data-icon='none' data-theme='a'>
         <strong>You can spend your wisdom to immediately place a purchased tile.</strong>
       </li>
-      <%- partial('item/partials/item', locals.items) %>
+      <%- partial('item/partials/item', locals.items['Tile']) %>
+    </ul>
+    <ul id='magic-store' class='store hidden' data-role='listview' data-theme='g'>
+      <li data-icon='none' data-theme='a'>
+        <strong>You can spend your wisdom to immediately use purchased magic.</strong>
+      </li>
+      <%- partial('item/partials/item', locals.items['Magic']) %>
+    </ul>
+    <ul id='wisdom-store' class='store hidden' data-role='listview' data-theme='g'>
+      <li data-icon='none' data-theme='a'>
+        <strong>You can spend Facebook Credits to purchase large amounts of wisdom.</strong>
+      </li>
+      <%- partial('item/partials/item', locals.items['Wisdom']) %>
     </ul>
   </center>
 <form>

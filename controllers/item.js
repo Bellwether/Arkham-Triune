@@ -1,5 +1,6 @@
 var baseController = require('./app').Controller;
 var Player = require('./../models/player').Model;
+var client = require('../lib/facebook/client');
 var item = require('./../models/item');
 
 var Controller = function(req, res) {
@@ -12,7 +13,7 @@ routes = {
 
     Player.Find(playerId, function(err, doc) {
       var opts = {layout: 'app/layouts/dialog', title: 'Starry Wisdom Bazaar'};
-      opts.items = item.Model.list;
+      opts.items = item.Model.categories;
       opts.wisdom = doc ? doc.wisdom : 0;
       res.render('item/index', opts);
     })
@@ -22,9 +23,19 @@ routes = {
     var playerId = req.authentication.playerId;
     var itemId = req.params.id;
 
-    item.Model.Purchase(playerId, itemId, function(err, doc) {
-      res.redirect('/')
-    })
+    item.Model.findOne({_id: itemId}, function(err, doc) {
+      if (doc && doc.premium) {
+        var fb = new client();
+        var opts = {PayDialogUrl: fb.getPayDialogUrl(doc), layout: 'app/layouts/blank'};
+        res.render('/facebook/pay', opts);
+      } else if (doc) {
+        item.Model.Purchase(playerId, itemId, function(err, doc) {
+          res.redirect('/')
+        })
+      } else {
+        res.redirect('/')
+      }
+    });
   }
 }
 Controller.prototype.Routes = routes;

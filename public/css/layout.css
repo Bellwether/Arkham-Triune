@@ -1,3 +1,7 @@
+.hidden {
+visibility:none;	
+}
+
 #hud.ui-header .ui-title {
 margin: .6em 20px .8em;
 }
@@ -20,4 +24,18 @@ font-size:16px;
 
 .ui-header .ui-title fieldset {
 margin-right:10px;
+}
+
+.ui-dialog .ui-header, 
+.ui-dialog .ui-content, 
+.ui-dialog .ui-footer { 
+  max-width: 700px;
+}
+
+.ui-dialog .ui-content {
+  min-height:250px;	
+}
+
+.ui-dialog form .ui-navbar {
+margin-bottom:15px;
 }

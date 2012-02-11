@@ -1,38 +1,69 @@
 [
   {
     name: "Elder Sign",
-    wisdom: 50
+    wisdom: 50,
+    category: "Magic"
   },
   {
     name: "Silver Key",
-    wisdom: 150
+    wisdom: 150,
+    category: "Magic"
   },
   {
     name: "Mythos Tome",
-    wisdom: 200
+    wisdom: 200,
+    category: "Magic"
   },
   {
-    name: "Farmland",
-    wisdom: 15
+    name: "Willow Grove",
+    wisdom: 15,
+    category: "Tile"
   },
   {
     name: "Cottage",
-    wisdom: 15
+    wisdom: 15,
+    category: "Tile"
   },
   {
     name: "Orchard",
-    wisdom: 30
+    wisdom: 30,
+    category: "Tile"
   },
   {
     name: "Cape Code",
-    wisdom: 30
+    wisdom: 30,
+    category: "Tile"
   },
   {
     name: "Mission",
-    wisdom: 25
+    wisdom: 25,
+    category: "Tile"
   },
   {
     name: "Union Hall",
-    wisdom: 25
+    wisdom: 25,
+    category: "Tile"
+  },
+  {	
+    category: "Wisdom",
+    name: "Minor Wisdom",
+    facebook: {
+      title: "Minor Wisdom",
+      description: "A large reserve of wisdom to be used at your whim",
+      price: 3,
+      item_id: "minorwisdom"
+    },
+    wisdom: 500
+  },
+  {	
+    category: "Wisdom",
+    name: "Major Wisdom",
+    facebook: {
+      title: "Major Wisdom",
+      description: "A tremendous reserve of wisdom to be used at your whim",
+      price: 10,
+      item_id: "majorwisdom"
+    },
+    wisdom: 2000
   }
 ]

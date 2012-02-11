@@ -10,7 +10,7 @@
     name: "Silver Key",
     group: "magic",
     level: 1,
-    move: 15,
+    move: 25,
     weight: 5
   },
   {

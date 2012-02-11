@@ -28,6 +28,16 @@
 	  })
     }
 
-	$('#bazaar li a').live('click', purchaseItem);
+    function showStore(e) {
+      var link = $(this);
+      var panelId = link.data('panel');
+
+      $('.store:visible').fadeOut(200, function() {
+        $('#'+panelId).fadeIn(200);
+      });
+    }
+
+	$('.store li a').live('click', purchaseItem);
+    $('.panel a').live('click', showStore);
   })
 })(jQuery);

@@ -226,12 +226,13 @@
   $.Turn.prototype.fxMatchPlacement = function fxMatchPlacement() {	
     for (var i = 0; i < this.data.matched.length; i++) {
       var match = this.data.matched[i];
+      this.map.cells[match.index].emplace(match.tile);
+
       for (var j = 0; j < match.cells.length; j++) {	
         var index = match.cells[j];
 		$.SFX().transfer(this.map.cells[index].tile, this.map.cells[match.index].tile);
         this.map.cells[index].empty();
       };
-      this.map.cells[match.index].emplace(match.tile);
     }
   }
   $.Turn.prototype.fxMonstersMoved = function fxMonstersMoved() {	
@@ -283,7 +284,12 @@
   }
   $.Turn.prototype.fxTilesRemoved = function fxTilesRemoved() {	
     for (var i = 0; i < this.data.removed.length; i++) {
-      this.map.cells[this.data.removed[i]].empty();
+      var index = this.data.removed[i];
+      var self = this;
+      this.map.cells[index].tile.addClass('animated rotateOut');
+      setTimeout(function() {
+        self.map.cells[index].empty();
+      }, 750);
     }	
   }
   $.Turn.prototype.fxMonstersCanabalized = function fxMonstersCanabalized() {
