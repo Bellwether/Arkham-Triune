@@ -76,21 +76,24 @@ function processPayment(fbr, res) {
   }
 }
 
-routes = {
-  index: function(req, res) {
-    var fbr = new FacebookAPIRequest(req);
+function respondToFacebook(req, res) {
+  var fbr = new FacebookAPIRequest(req);
 console.log('FACEBOOK index params '+JSON.stringify(req.params))
 
-    if (fbr.hasError()) {
-      res.render('facebook/index', {errorDescription: fbr.error_description});
-    } else if (fbr.isAuthenticating()) {
-      authenticateUser(fbr);
-    } else if (fbr.isPaying()) {
-      processPayment(fbr, res);
-    } else {
-      res.render('facebook/index');
-    };
-  },
+  if (fbr.hasError()) {
+    res.render('facebook/index', {errorDescription: fbr.error_description});
+  } else if (fbr.isAuthenticating()) {
+    authenticateUser(fbr);
+  } else if (fbr.isPaying()) {
+    processPayment(fbr, res);
+  } else {
+    res.render('facebook/index');
+  };
+}
+
+routes = {
+  index: respondToFacebook,
+  create: respondToFacebook,
 	
   new: function(req, res) {
     var fb = new client();

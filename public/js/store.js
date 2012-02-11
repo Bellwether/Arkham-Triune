@@ -2,10 +2,15 @@
 
   $(document).ready(function() {
     function purchaseItem(e) {
-	console.log('purchaseItem')
-      e.preventDefault();
-
       var link = $(this);
+
+      if (link.is('.premium')) {
+        link.attr('rel', "external");
+        link.unbind('click', purchaseItem);
+        return true;
+      };
+
+      e.preventDefault();
       var itemName = link.children('h3').html();
       var wisdom = link.find('strong').html();
 

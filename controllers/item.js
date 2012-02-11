@@ -27,7 +27,7 @@ routes = {
       if (doc && doc.premium) {
         var fb = new client();
         var opts = {PayDialogUrl: fb.getPayDialogUrl(doc), layout: 'app/layouts/blank'};
-        res.render('/facebook/pay', opts);
+        res.render('facebook/pay', opts);
       } else if (doc) {
         item.Model.Purchase(playerId, itemId, function(err, doc) {
           res.redirect('/')
