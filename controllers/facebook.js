@@ -8,8 +8,9 @@ var FacebookAPIRequest = function(req) {
   this.error = params.access_denied;
   this.error_description = params.error_description;
   this.code = params.code;
+  this.method = params.method;
 
-  if (req.params.method) {
+  if (this.method) {
     this.payment = new payment(req, params);
   }
 }

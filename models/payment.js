@@ -18,7 +18,7 @@ schema.virtual('placed').get(function () {
   return this.status === 'placed';
 });
 
-schema.statics.Create = function Create(playerId, itemId, params, callback) {
+schema.statics.Create = function Create(playerId, itemId, callback) {
   var createdAt = Date.now();
   var payment = new this({
     createdAt: createdAt,
