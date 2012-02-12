@@ -78,7 +78,7 @@ function processPayment(fbr, res) {
 
 function respondToFacebook(req, res) {
   var fbr = new FacebookAPIRequest(req);
-console.log('FACEBOOK index params '+JSON.stringify(req.params))
+console.log('FACEBOOK index params '+JSON.stringify(req.params)+" "+JSON.stringify(req.body)+" "+JSON.stringify(req.query))
 
   if (fbr.hasError()) {
     res.render('facebook/index', {errorDescription: fbr.error_description});

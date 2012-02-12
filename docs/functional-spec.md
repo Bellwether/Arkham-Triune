@@ -20,9 +20,9 @@ Match-3 puzzler and city simulation set in H.P. Lovecraft's Arkham Country.
 ### BACKEND
 
 + Node.js + Express
-+ MongoDB
++ MongoDB database cluster 
 + custom AMI hosted on EC2 for App and DB servers
-+ Capistrano for various devops
++ Capistrano for sundry devops
 
 ### FACEBOOK INTEGRATION
 

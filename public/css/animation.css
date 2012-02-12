@@ -131,3 +131,36 @@
   -o-animation-fill-mode: forwards;
   animation-fill-mode: forwards;
 }
+
+@-webkit-keyframes throb {
+  0%, 100% {opacity: 1; text-shadow: 0 0 6px #eee;; }	
+  50% {opacity: 0.8; text-shadow: none}
+}
+
+@-moz-keyframes throb {
+  0%, 100% {opacity: 1; text-shadow: 0 0 6px #eee;; }	
+  50% {opacity: 0.8; text-shadow: none}
+}
+
+@-ms-keyframes throb {
+  0%, 100% {opacity: 1; text-shadow: 0 0 6px #eee;; }	
+  50% {opacity: 0.8; text-shadow: none}
+}
+
+@-o-keyframes throb {
+  0%, 100% {opacity: 1; text-shadow: 0 0 6px #eee;; }	
+  50% {opacity: 0.8; text-shadow: none}
+}
+
+@keyframes throb {
+  0%, 100% {opacity: 1; text-shadow: 0 0 6px #eee;; }	
+  50% {opacity: 0.8; text-shadow: none}
+}
+
+.throb {
+  -webkit-animation: throb infinite 1s ease;
+  -moz-animation: throb infinite 1s ease;
+  -ms-animation: throb infinite 1s ease;
+  -o-animation: throb infinite 1s ease;
+  animation: throb infinite 1s ease;
+}
