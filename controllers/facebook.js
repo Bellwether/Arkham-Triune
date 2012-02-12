@@ -1,59 +1,7 @@
 var baseController = require('./app').Controller;
 var client = require('../lib/facebook/client');
-var Payment = require('./../models/payment').Model;
+var payment = require('../lib/facebook/payment');
 var Item = require('./../models/payment').Model;
-
-var FacebookPaymentRequest = function(req, params) {
-  this.host = 'http://'+req.header('host')+'/';
-  this.order_id = params.order_id;
-
-  this.buyer = params.buyer;
-  this.receiver = params.receiver;
-  this.order_info = params.order_info;
-  this.method = params.method;
-
-  this.status = params.status;
-  this.order_details = params.order_details;
-}
-FacebookPaymentRequest.prototype.paymentId = function paymentId() {
-  return this.order_info || (this.order_details ? this.order_details.order_info : null);
-}
-FacebookPaymentRequest.prototype.itemToJson = function itemToJson(doc) {
-  var host = this.host;
-  return {
-    content:[
-      {
-        "title": doc.facebook.title,
-        "price": doc.facebook.price,
-        "description": doc.facebook.description,
-        "item_id": doc.facebook.item_id,
-
-        "image_url": host+"apple-touch-icon.png",
-        "product_url": host+"apple-touch-icon.png"
-      }
-   ],
-   method: "payments_get_items"
-  };
-}
-FacebookPaymentRequest.prototype.paymentToJson = function paymentToJson(doc) {
-  return  {
-    content: {
-      status: 'settled',
-      order_id: doc.orderId
-    },
-    method: "payments_status_update"
-  };
-}
-FacebookPaymentRequest.prototype.isRequestingItem = function isRequestingItem() {
-  return this.method === 'payments_get_items';
-}
-FacebookPaymentRequest.prototype.isCompletingPurchase = function isCompletingPurchase() {
-  return this.method === 'payments_status_update';
-}
-FacebookPaymentRequest.prototype.findOrder = function findOrder(callback) {
-  var query = {_id: this.paymentId()};
-  Payment.findOne(query, callback);
-}
 
 var FacebookAPIRequest = function(req) {
   var params = req.params || req.body || req.query || {};
@@ -62,7 +10,7 @@ var FacebookAPIRequest = function(req) {
   this.code = params.code;
 
   if (req.params.method) {
-    this.payment = new FacebookPaymentRequest(req, params);
+    this.payment = new payment(req, params);
   }
 }
 FacebookAPIRequest.prototype.hasError = function hasError() {
@@ -88,7 +36,7 @@ function authenticateUser(fbr) {
   });
 }
 function processPayment(fbr, res) {
-  fbr.payment.findOrder(function(err, doc) {	
+  fbr.payment.findOrder(function(err, doc) {
     if (fbr.payment.isRequestingItem()) {
 console.log("findOrder itemToJson "+JSON.stringify(fbr.payment.itemToJson(doc.item))+' (err='+err+')')
       res.json(doc ? fbr.payment.itemToJson(doc.item) : {err: err});
