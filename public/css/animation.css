@@ -9,6 +9,10 @@
   -ms-animation-fill-mode: both;
   -o-animation-fill-mode: both;
   animation-fill-mode: both;
+
+ -webkit-backface-visibility: hidden;
+ -webkit-transform: translate3d(0,0,0); /* This helps with the flicker a lot. */
+
 }
 
 @-webkit-keyframes rotateOut {

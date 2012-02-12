@@ -12,7 +12,7 @@
 	
     return {
       transfer: function(source, destination, callback) {
-        var transferable = source.clone();
+        var transferable = source;
         var css = {position: 'absolute', height: 'inherit', width: 'inherit', zIndex: 1000};
         transferable.css(css);
         var dx = destination.offset().left - source.offset().left;
@@ -27,7 +27,7 @@
         }
 
         var animation = {marginTop: dy, marginLeft: dx};
-        transferable.prependTo(source.parent()).animate(animation, {
+        transferable.animate(animation, {
           duration: duration,
           complete: onComplete
         });
