@@ -1,5 +1,6 @@
 var baseController = require('./app').Controller;
 var Player = require('./../models/player').Model;
+var Payment = require('./../models/payment').Model;
 var client = require('../lib/facebook/client');
 var item = require('./../models/item');
 
@@ -25,9 +26,11 @@ routes = {
 
     item.Model.findOne({_id: itemId}, function(err, doc) {
       if (doc && doc.premium) {
-        var fb = new client();
-        var opts = {PayDialogUrl: fb.getPayDialogUrl(doc), layout: 'app/layouts/blank'};
-        res.render('facebook/pay', opts);
+        Payment.Create(playerId, itemId, function(err, pay) {
+          var fb = new client();
+          var opts = {PayDialogUrl: fb.getPayDialogUrl(pay), layout: 'app/layouts/blank'};
+          res.render('facebook/pay', opts);
+        })
       } else if (doc) {
         item.Model.Purchase(playerId, itemId, function(err, doc) {
           res.redirect('/')
