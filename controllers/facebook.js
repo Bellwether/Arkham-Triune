@@ -4,12 +4,13 @@ var payment = require('../lib/facebook/payment');
 var Item = require('./../models/payment').Model;
 
 var FacebookAPIRequest = function(req) {
-  var params = req.params || req.body || req.query || {};
+  var params = req.body || req.query || req.params || {};
   this.error = params.access_denied;
   this.error_description = params.error_description;
   this.code = params.code;
   this.method = params.method;
 
+console.log('fb req params '+JSON.stringify(params))
   if (this.method) {
     this.payment = new payment(req, params);
   }
@@ -59,7 +60,7 @@ console.log("findOrder paymentToJson "+JSON.stringify(fbr.payment.paymentToJson(
 function respondToFacebook(req, res) {
   var fbr = new FacebookAPIRequest(req);
 
-console.log('FACEBOOK index params '+JSON.stringify(req.params)+" "+JSON.stringify(req.body)+" "+JSON.stringify(req.query))
+console.log('FACEBOOK index params '+JSON.stringify(req.params)+" "+JSON.stringify(req.body)+" "+JSON.stringify(req.query)+' paying? '+fbr.isPaying())
 
   if (fbr.hasError()) {
     res.render('facebook/index', {errorDescription: fbr.error_description});
