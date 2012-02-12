@@ -215,6 +215,11 @@
     if (tile) {
       this.map.moves.text(1);	
       this.cell.emplace(tile);
+      this.cell.tile.addClass('animated').addClass('pulse');
+      var self = this;
+      setTimeout(function() {
+        self.cell.tile.removeClass('animated').removeClass('pulse')
+      }, 1000);
     } else {		
       this.cell.deselect();
     }
